@@ -32,7 +32,17 @@ function calPoints(cards: string[]): number {
     return res
 }
 
-const Hand = ({ identity, ranCard, setRanCard }: { identity: string, ranCard: boolean, setRanCard: Dispatch<SetStateAction<boolean>> }) => {
+type Props = {
+    identity: string,
+    playerOver?: boolean,
+    setPlayerOver?: Dispatch<SetStateAction<boolean>>,
+    playerPoints?: number,
+    setPlayerPoints?: Dispatch<SetStateAction<number>>,
+    gameOver?: boolean,
+    setGameOver?: Dispatch<SetStateAction<boolean>>
+}
+
+const Hand = ({ identity, playerOver, setPlayerOver, playerPoints, setPlayerPoints, gameOver, setGameOver }: Props) => {
     const [cards, setCards] = useState<string[]>([])
     const [points, setPoints] = useState<number>(0)
 
@@ -52,11 +62,13 @@ const Hand = ({ identity, ranCard, setRanCard }: { identity: string, ranCard: bo
     }
 
     useEffect(() => {
-        setCards([randomCard()])
+        setCards([randomCard(), randomCard()])
     }, [])
 
     useEffect(() => {
         setPoints(calPoints(cards))
+        // TODO: player身份抽爆了直接over()
+        // TODO: 21点直接over
     }, [cards])
 
     const askForCards = () => {
@@ -66,13 +78,29 @@ const Hand = ({ identity, ranCard, setRanCard }: { identity: string, ranCard: bo
         ])
     }
 
-    useEffect(() => {
-        if (!ranCard)
-            return
+    const over = () => {
+        setPlayerOver(true)
+        setPlayerPoints(points)
+    }
+
+    function delay(ms: number) {
+        return new Promise( resolve => setTimeout(resolve, ms) );
+    }
+
+    const enemyTurn = async () => {
+        // TODO: 21点判断
+        // TODO: check playerPoints => 爆了直接判负
+        await delay(666)
         askForCards()
-        if (identity === "enemy")
-            setRanCard(false)
-    }, [ranCard])
+        // TODO: equal
+        // TODO: over? over then 21?
+    }
+
+    useEffect(() => {
+        if (identity === "player" || playerOver === false || calPoints(cards) > playerPoints)
+            return
+        enemyTurn()
+    }, [playerOver, cards])
 
     return (
         <div className={identity === "player" ? "relative h-1/3 top-2/3" : "relative h-1/3 bottom-1/3"}>
@@ -81,18 +109,17 @@ const Hand = ({ identity, ranCard, setRanCard }: { identity: string, ranCard: bo
                     cards.map(card => <li className="relative flex-auto" key={new Date().getTime().toString() + Math.random().toString()}><Card content={card} /></li>)
                 }
             </ul>
-            {/* <ul className="absolute flex flex-col justify-between top-0 right-44 h-full py-20 text-white"> */}
             <ul className={"absolute flex flex-col " + (identity === "player" ? "justify-between " : "justify-center ") +  "top-0 right-44 h-full py-10 text-white"}>
                 <li>Points: {points}</li>
                 {
                     identity === "player"
                     &&
                     <>
-                        <li className="cursor-pointer">Bet: 0</li>
-                        <li className="cursor-pointer" onClick={() => setRanCard(true)}>Ask for cards</li>
-                        <li className="cursor-pointer">Double down</li>
-                        <li className="cursor-pointer">Admit defeat</li>
-                        <li className="cursor-pointer">Over</li>
+                        <li>Bet: 0</li>
+                        <li className={playerOver === false ? "cursor-pointer" : ""} onClick={() => playerOver === false ? askForCards() : {}}>Ask for cards</li>
+                        <li className={playerOver === false ? "cursor-pointer" : ""}>Double down</li>
+                        <li className={playerOver === false ? "cursor-pointer" : ""}>Admit defeat</li>
+                        <li className={playerOver === false ? "cursor-pointer" : ""} onClick={over}>Over</li>
                     </>
                 }
             </ul>

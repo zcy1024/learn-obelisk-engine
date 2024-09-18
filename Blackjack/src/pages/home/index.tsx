@@ -5,17 +5,26 @@ import Hand from "../../components/hand";
 
 const Home = () => {
     const [play, setPlay] = useState<boolean>(false)
-    const [ranCard, setRanCard] = useState<boolean>(false)
+    const [playerOver, setPlayerOver] = useState<boolean>(false)
+    const [playerPoints, setPlayerPoints] = useState<number>(0)
+    const [gameOver, setGameOver] = useState<boolean>(false)
+
+    const startGame = () => {
+        setPlay(true)
+        setPlayerOver(false)
+        setPlayerPoints(0)
+        setGameOver(false)
+    }
 
     return (
         <>
-            <Card content="?" setPlay={setPlay} />
+            <Card content="?" playing={play} startGame={startGame} />
             {
                 play
                 &&
                 <>
-                    <Hand identity="player" ranCard={ranCard} setRanCard={setRanCard} />
-                    <Hand identity="enemy" ranCard={ranCard} setRanCard={setRanCard} />
+                    <Hand identity="player" playerOver={playerOver} setPlayerOver={setPlayerOver} setPlayerPoints={setPlayerPoints} />
+                    <Hand identity="enemy" playerOver={playerOver} playerPoints={playerPoints} gameOver={gameOver} setGameOver={setGameOver} />
                 </>
             }
         </>
