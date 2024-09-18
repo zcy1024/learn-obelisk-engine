@@ -6,7 +6,7 @@ import Header from "../components/header";
 
 const IndexPage: NextPage = () => {
     return (
-        <main className="h-screen w-screen bg-black " style={{opacity: "0.86"}}>
+        <main className="h-screen w-screen bg-black select-none" style={{opacity: "0.86"}}>
             <Heads />
             <Header />
             <Home />

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Popover } from '@headlessui/react'
 import { AnimatePresence, motion } from 'framer-motion'
 import * as React from "react";
-import { ConnectButton } from "@mysten/dapp-kit";
+import { ConnectButton, useCurrentWallet } from "@mysten/dapp-kit";
 
 function classNames(...classes) {
     return classes.filter(Boolean).join(' ')
@@ -37,7 +37,6 @@ function ChevronUpIcon(props) {
 
 
 const Header = () => {
-
     return (
         <div className={classNames("py-4 ", "flex fixed mx-auto z-40 inset-x-0 px-4 sm:px-6 lg:px-8 xl:px-24 2xl:px-56  w-full justify-between transition-all duration-700 ease-in-out  items-center")}>
             <div className={"relative z-10 items-center flex "}>
