@@ -38,8 +38,8 @@ type Props = {
     setPlayerOver?: Dispatch<SetStateAction<boolean>>,
     playerPoints?: number,
     setPlayerPoints?: Dispatch<SetStateAction<number>>,
-    gameOver?: boolean,
-    setGameOver?: Dispatch<SetStateAction<boolean>>
+    gameOver?: string,
+    setGameOver?: Dispatch<SetStateAction<string>>
 }
 
 const Hand = ({ identity, playerOver, setPlayerOver, playerPoints, setPlayerPoints, gameOver, setGameOver }: Props) => {
@@ -66,9 +66,10 @@ const Hand = ({ identity, playerOver, setPlayerOver, playerPoints, setPlayerPoin
     }, [])
 
     useEffect(() => {
-        setPoints(calPoints(cards))
-        // TODO: player身份抽爆了直接over()
-        // TODO: 21点直接over
+        const points = calPoints(cards)
+        setPoints(points)
+        if (identity === "player" && points >= 21)
+            over()
     }, [cards])
 
     const askForCards = () => {
@@ -88,17 +89,34 @@ const Hand = ({ identity, playerOver, setPlayerOver, playerPoints, setPlayerPoin
     }
 
     const enemyTurn = async () => {
-        // TODO: 21点判断
-        // TODO: check playerPoints => 爆了直接判负
+        if (gameOver)
+            return
         await delay(666)
         askForCards()
-        // TODO: equal
-        // TODO: over? over then 21?
     }
 
     useEffect(() => {
-        if (identity === "player" || playerOver === false || calPoints(cards) > playerPoints)
+        if (identity === "player" || playerOver === false || gameOver)
             return
+        const points = calPoints(cards)
+        if (points > playerPoints || playerPoints >= 21) {
+            if (playerPoints > 21)
+                setGameOver("LOSE")
+            else if (playerPoints === points)
+                setGameOver("DRAW")
+            else if (points > 21)
+                setGameOver("WIN")
+            else
+                setGameOver(playerPoints > points ? "WIN" : "LOSE")
+            return
+        }
+        if (points === playerPoints && 21 - points <= 5) {
+            const dx = 21 - points
+            if (Math.random() * (dx + 1) <= dx / 2) {
+                setGameOver("DRAW")
+                return
+            }
+        }
         enemyTurn()
     }, [playerOver, cards])
 

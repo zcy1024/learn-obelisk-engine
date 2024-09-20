@@ -2,18 +2,23 @@ import { useState } from "react";
 
 import Card from "../../components/card";
 import Hand from "../../components/hand";
+import Settlement from "../../components/settlement";
 
 const Home = () => {
     const [play, setPlay] = useState<boolean>(false)
     const [playerOver, setPlayerOver] = useState<boolean>(false)
     const [playerPoints, setPlayerPoints] = useState<number>(0)
-    const [gameOver, setGameOver] = useState<boolean>(false)
+    const [gameOver, setGameOver] = useState<string>("")
 
     const startGame = () => {
         setPlay(true)
         setPlayerOver(false)
         setPlayerPoints(0)
-        setGameOver(false)
+    }
+
+    const oneMoreRound = () => {
+        setPlay(false)
+        setGameOver("")
     }
 
     return (
@@ -23,10 +28,11 @@ const Home = () => {
                 play
                 &&
                 <>
-                    <Hand identity="player" playerOver={playerOver} setPlayerOver={setPlayerOver} setPlayerPoints={setPlayerPoints} />
+                    <Hand identity="player" playerOver={playerOver} setPlayerOver={setPlayerOver} setPlayerPoints={setPlayerPoints} setGameOver={setGameOver} />
                     <Hand identity="enemy" playerOver={playerOver} playerPoints={playerPoints} gameOver={gameOver} setGameOver={setGameOver} />
                 </>
             }
+            { gameOver && <Settlement result={gameOver} oneMoreRound={oneMoreRound} /> }
         </>
     )
 };
