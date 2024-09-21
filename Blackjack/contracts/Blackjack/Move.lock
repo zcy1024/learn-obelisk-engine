@@ -2,7 +2,7 @@
 
 [move]
 version = 2
-manifest_digest = "8ED67A5B312F3004EC29B7C5CF0560F9D5E2F34E7650F2B7826FEBA7A9A307F6"
+manifest_digest = "D412C4B792051FD177E281117F2D670A0047C005D92470BD27869988388419B0"
 deps_digest = "3C4103934B1E040BB6B23F1D610B4EF9F2F1166A50A104EADCF77467C004C600"
 dependencies = [
   { name = "Obelisk" },
@@ -15,7 +15,7 @@ source = { git = "https://github.com/MystenLabs/sui.git", rev = "mainnet-v1.31.1
 
 [[move.package]]
 name = "Obelisk"
-source = { git = "https://github.com/0xobelisk/obelisk-engine.git", rev = "mainnet", subdir = "packages/obelisk-framework" }
+source = { git = "https://github.com/0xobelisk/obelisk-engine.git", rev = "main", subdir = "packages/obelisk-framework" }
 
 dependencies = [
   { name = "Sui" },
