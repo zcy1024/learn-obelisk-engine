@@ -14,7 +14,7 @@ module Blackjack::blackjack_system {
     // error not player
     const ENotPlayer: u64 = 2;
 
-    public entry fun register(world: &mut World, ctx: &mut TxContext) {
+    public entry fun register(world: &mut World, ctx: &TxContext) {
         let player = tx_context::sender(ctx);
         assert!(!player_schema::contains(world, player), EAlreadyRegister);
         assert!(!game_schema::contains(world, player), EAlreadyRegister);
@@ -53,20 +53,19 @@ module Blackjack::blackjack_system {
         };
     }
 
-    public entry fun settlement(world: &mut World, changeAmount: u128, ctx: &mut TxContext) {
-        let player = ctx.sender();
+    public entry fun settlement(world: &mut World, changeAmount: u128, player: address) {
         assert!(player_schema::contains(world, player), ENotPlayer);
         let amount = player_schema::get(world, player) + changeAmount;
         player_schema::set(world, player, amount);
     }
 
-    public entry fun recharge(world: &mut World, coin: Coin<SUI>, recipient: address, ctx: &mut TxContext) {
+    public entry fun recharge(world: &mut World, coin: Coin<SUI>, recipient: address, ctx: &TxContext) {
         let amount = coin.value() as u128;
-        settlement(world, amount, ctx);
+        settlement(world, amount, ctx.sender());
         transfer::public_transfer(coin, recipient);
     }
 
-    public entry fun withdraw(world: &mut World, coin: Coin<SUI>, ctx: &mut TxContext) {
+    public entry fun withdraw(world: &mut World, coin: Coin<SUI>, ctx: &TxContext) {
         let player = ctx.sender();
         assert!(player_schema::contains(world, player), ENotPlayer);
         transfer::public_transfer(coin, player);

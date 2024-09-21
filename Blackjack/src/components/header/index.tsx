@@ -1,9 +1,13 @@
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Popover } from '@headlessui/react'
 import { AnimatePresence, motion } from 'framer-motion'
 import * as React from "react";
-import { ConnectButton, useCurrentWallet } from "@mysten/dapp-kit";
+
+import { NETWORK, PACKAGE_ID, WORLD_ID } from '../../chain/config';
+import { loadMetadata, Obelisk, Transaction, TransactionResult } from '@0xobelisk/sui-client';
+import { ACCOUNT } from "../../chain/key";
+import { ConnectButton, useSignAndExecuteTransaction, useCurrentAccount } from '@mysten/dapp-kit';
 
 function classNames(...classes) {
     return classes.filter(Boolean).join(' ')
@@ -37,6 +41,69 @@ function ChevronUpIcon(props) {
 
 
 const Header = () => {
+    const [balance, setBalance] = useState<number>(0)
+    const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction()
+    const account = useCurrentAccount()
+
+    const getBalance = async () => {
+        const metadata = await loadMetadata(NETWORK, PACKAGE_ID)
+        const obelisk = new Obelisk({
+            networkType: NETWORK,
+            packageId: PACKAGE_ID,
+            metadata: metadata,
+        })
+        let res = await obelisk.getEntity(WORLD_ID, "player", account.address)
+        // new user
+        if (!res) {
+            const tx = new Transaction()
+            const world = tx.object(WORLD_ID)
+            const params = [world]
+            await obelisk.tx.blackjack_system.register(tx, params, undefined, true)
+            await signAndExecuteTransaction(
+                {
+                    transaction: tx,
+                    chain: `sui:${NETWORK}`
+                },
+                {
+                    onSuccess: async () => {
+                        res = await obelisk.getEntity(WORLD_ID, "player", account.address)
+                        setBalance(Number(res[0]))
+                    }
+                }
+            )
+        }
+        setBalance(res ? Number(res[0]) : 0)
+    }
+
+    const handlerRecharge = async () => {
+        const metadata = await loadMetadata(NETWORK, PACKAGE_ID)
+        const obelisk = new Obelisk({
+            networkType: NETWORK,
+            packageId: PACKAGE_ID,
+            metadata: metadata,
+        })
+        const tx = new Transaction()
+        const world = tx.object(WORLD_ID)
+        const chargeAmount = 1000000000
+        const coin = tx.splitCoins(tx.gas, [chargeAmount])
+        const params = [world, coin, tx.pure.address(ACCOUNT)]
+        await obelisk.tx.blackjack_system.recharge(tx, params, undefined, true)
+        await signAndExecuteTransaction(
+            {
+                transaction: tx,
+                chain: `sui:${NETWORK}`
+            },
+            {
+                onSuccess: () => getBalance()
+            }
+        )
+    }
+
+    useEffect(() => {
+        if (account)
+            getBalance()
+    }, [account])
+
     return (
         <div className={classNames("py-4 ", "flex fixed mx-auto z-40 inset-x-0 px-4 sm:px-6 lg:px-8 xl:px-24 2xl:px-56  w-full justify-between transition-all duration-700 ease-in-out  items-center")}>
             <div className={"relative z-10 items-center flex "}>
@@ -111,14 +178,14 @@ const Header = () => {
 
                 <div className="hidden lg:flex gap-4 items-center ">
                     <div className="hidden lg:flex lg:gap-10">
-                        <button className="text-sm lg:text-base font-medium text-white transition duration-700 ">
+                        <button className="text-sm lg:text-base font-medium text-white transition duration-700 " onClick={handlerRecharge}>
                             Recharge
                         </button>
                         <button className="text-sm lg:text-base font-medium text-white transition duration-700 ">
                             Withdraw
                         </button>
                         <button className="text-sm lg:text-base font-medium text-white transition duration-700 " disabled>
-                            Game Balance: 0
+                            Game Balance: {balance}
                         </button>
                     </div>
                 </div>
