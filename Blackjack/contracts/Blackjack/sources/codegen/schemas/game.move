@@ -16,11 +16,11 @@ module Blackjack::game_schema {
 	// dealer
 	// player
 	public struct GameData has copy, drop , store {
-		dealer: vector<u64>,
-		player: vector<u64>
+		dealer: vector<u8>,
+		player: vector<u8>
 	}
 
-	public fun new(dealer: vector<u64>, player: vector<u64>): GameData {
+	public fun new(dealer: vector<u8>, player: vector<u8>): GameData {
 		GameData {
 			dealer, 
 			player
@@ -31,7 +31,7 @@ module Blackjack::game_schema {
 		schema::add<Table<address,GameData>>(_obelisk_world, SCHEMA_ID, table::new<address, GameData>(ctx), admin_cap);
 	}
 
-	public(package) fun set(_obelisk_world: &mut World, _obelisk_entity_key: address,  dealer: vector<u64>, player: vector<u64>) {
+	public(package) fun set(_obelisk_world: &mut World, _obelisk_entity_key: address,  dealer: vector<u8>, player: vector<u8>) {
 		let _obelisk_schema = schema::get_mut<Table<address,GameData>, AppKey>(app_key::new(), _obelisk_world, SCHEMA_ID);
 		let _obelisk_data = new( dealer, player);
 		if(table::contains<address, GameData>(_obelisk_schema, _obelisk_entity_key)) {
@@ -42,7 +42,7 @@ module Blackjack::game_schema {
 		events::emit_set(SCHEMA_ID, SCHEMA_TYPE, some(_obelisk_entity_key), _obelisk_data)
 	}
 
-	public(package) fun set_dealer(_obelisk_world: &mut World, _obelisk_entity_key: address, dealer: vector<u64>) {
+	public(package) fun set_dealer(_obelisk_world: &mut World, _obelisk_entity_key: address, dealer: vector<u8>) {
 		let _obelisk_schema = schema::get_mut<Table<address,GameData>, AppKey>(app_key::new(),_obelisk_world, SCHEMA_ID);
 		assert!(table::contains<address, GameData>(_obelisk_schema, _obelisk_entity_key), EEntityDoesNotExist);
 		let _obelisk_data = table::borrow_mut<address, GameData>(_obelisk_schema, _obelisk_entity_key);
@@ -50,7 +50,7 @@ module Blackjack::game_schema {
 		events::emit_set(SCHEMA_ID, SCHEMA_TYPE, some(_obelisk_entity_key), *_obelisk_data)
 	}
 
-	public(package) fun set_player(_obelisk_world: &mut World, _obelisk_entity_key: address, player: vector<u64>) {
+	public(package) fun set_player(_obelisk_world: &mut World, _obelisk_entity_key: address, player: vector<u8>) {
 		let _obelisk_schema = schema::get_mut<Table<address,GameData>, AppKey>(app_key::new(),_obelisk_world, SCHEMA_ID);
 		assert!(table::contains<address, GameData>(_obelisk_schema, _obelisk_entity_key), EEntityDoesNotExist);
 		let _obelisk_data = table::borrow_mut<address, GameData>(_obelisk_schema, _obelisk_entity_key);
@@ -58,7 +58,7 @@ module Blackjack::game_schema {
 		events::emit_set(SCHEMA_ID, SCHEMA_TYPE, some(_obelisk_entity_key), *_obelisk_data)
 	}
 
-	public fun get(_obelisk_world: &World, _obelisk_entity_key: address): (vector<u64>,vector<u64>) {
+	public fun get(_obelisk_world: &World, _obelisk_entity_key: address): (vector<u8>,vector<u8>) {
 		let _obelisk_schema = schema::get<Table<address,GameData>>(_obelisk_world, SCHEMA_ID);
 		assert!(table::contains<address, GameData>(_obelisk_schema, _obelisk_entity_key), EEntityDoesNotExist);
 		let _obelisk_data = table::borrow<address, GameData>(_obelisk_schema, _obelisk_entity_key);
@@ -68,14 +68,14 @@ module Blackjack::game_schema {
 		)
 	}
 
-	public fun get_dealer(_obelisk_world: &World, _obelisk_entity_key: address): vector<u64> {
+	public fun get_dealer(_obelisk_world: &World, _obelisk_entity_key: address): vector<u8> {
 		let _obelisk_schema = schema::get<Table<address,GameData>>(_obelisk_world, SCHEMA_ID);
 		assert!(table::contains<address, GameData>(_obelisk_schema, _obelisk_entity_key), EEntityDoesNotExist);
 		let _obelisk_data = table::borrow<address, GameData>(_obelisk_schema, _obelisk_entity_key);
 		_obelisk_data.dealer
 	}
 
-	public fun get_player(_obelisk_world: &World, _obelisk_entity_key: address): vector<u64> {
+	public fun get_player(_obelisk_world: &World, _obelisk_entity_key: address): vector<u8> {
 		let _obelisk_schema = schema::get<Table<address,GameData>>(_obelisk_world, SCHEMA_ID);
 		assert!(table::contains<address, GameData>(_obelisk_schema, _obelisk_entity_key), EEntityDoesNotExist);
 		let _obelisk_data = table::borrow<address, GameData>(_obelisk_schema, _obelisk_entity_key);

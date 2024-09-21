@@ -15,10 +15,10 @@ module Blackjack::player_schema {
 
 	// value
 	public struct PlayerData has copy, drop , store {
-		value: u64
+		value: u128
 	}
 
-	public fun new(value: u64): PlayerData {
+	public fun new(value: u128): PlayerData {
 		PlayerData {
 			value
 		}
@@ -28,7 +28,7 @@ module Blackjack::player_schema {
 		schema::add<Table<address,PlayerData>>(_obelisk_world, SCHEMA_ID, table::new<address, PlayerData>(ctx), admin_cap);
 	}
 
-	public(package) fun set(_obelisk_world: &mut World, _obelisk_entity_key: address,  value: u64) {
+	public(package) fun set(_obelisk_world: &mut World, _obelisk_entity_key: address,  value: u128) {
 		let _obelisk_schema = schema::get_mut<Table<address,PlayerData>, AppKey>(app_key::new(), _obelisk_world, SCHEMA_ID);
 		let _obelisk_data = new( value);
 		if(table::contains<address, PlayerData>(_obelisk_schema, _obelisk_entity_key)) {
@@ -39,7 +39,7 @@ module Blackjack::player_schema {
 		events::emit_set(SCHEMA_ID, SCHEMA_TYPE, some(_obelisk_entity_key), _obelisk_data)
 	}
 
-	public fun get(_obelisk_world: &World, _obelisk_entity_key: address): u64 {
+	public fun get(_obelisk_world: &World, _obelisk_entity_key: address): u128 {
 		let _obelisk_schema = schema::get<Table<address,PlayerData>>(_obelisk_world, SCHEMA_ID);
 		assert!(table::contains<address, PlayerData>(_obelisk_schema, _obelisk_entity_key), EEntityDoesNotExist);
 		let _obelisk_data = table::borrow<address, PlayerData>(_obelisk_schema, _obelisk_entity_key);

@@ -5,7 +5,6 @@ module Blackjack::init {
     use Blackjack::app_key::AppKey;
     use obelisk::access_control;
     use obelisk::world;
-	use Blackjack::dealer_schema;
 	use Blackjack::player_schema;
 	use Blackjack::game_schema;
 
@@ -16,7 +15,6 @@ module Blackjack::init {
         access_control::authorize_app<AppKey>(&admin_cap, &mut _obelisk_world);
 
         // Add Schema
-		dealer_schema::register(&mut _obelisk_world, &admin_cap, ctx);
 		player_schema::register(&mut _obelisk_world, &admin_cap, ctx);
 		game_schema::register(&mut _obelisk_world, &admin_cap, ctx);
 

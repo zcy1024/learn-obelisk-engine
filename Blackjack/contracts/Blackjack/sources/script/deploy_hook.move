@@ -1,6 +1,5 @@
 module Blackjack::deploy_hook {
     use obelisk::world::{World, AdminCap};
-    use Blackjack::dealer_schema;
 
     // Not the right admin for this world
     const ENotAdmin: u64 = 0;
@@ -9,7 +8,6 @@ module Blackjack::deploy_hook {
          assert!(world.admin() == object::id(admin_cap), ENotAdmin);
         
         // Logic that needs to be automated once the contract is deployed
-        dealer_schema::set(world, world.admin(), 0);
     }
 
     #[test_only]

@@ -1,19 +1,18 @@
 module Blackjack::blackjack_system {
     use std::string::{Self, String};
     use sui::random::Random;
+    use sui::sui::SUI;
+    use sui::sui::Coin;
     use Blackjack::world::World;
     use Blackjack::player_schema;
     use Blackjack::game_schema;
-    use Blackjack::dealer_schema;
 
     // error already register
     const EAlreadyRegister: u64 = 0;
     // error player don't have pre-save balance
     const ENotPreSaveBalance: u64 = 1;
-    // error dealer don't have balance
-    const EDealerNotBalance: u64 = 2;
     // error not player
-    const ENotPlayer: u64 = 3;
+    const ENotPlayer: u64 = 2;
 
     public entry fun register(world: &mut World, ctx: &mut TxContext) {
         let player = tx_context::sender(ctx);
@@ -25,9 +24,8 @@ module Blackjack::blackjack_system {
     }
 
     public entry fun play_game(world: &mut World, random: &Random, ctx: &mut TxContext) {
-        let player = tx.sender();
+        let player = ctx.sender();
         assert!(player_schema::get(world, player) == 0, ENotPreSaveBalance);
-        assert!(dealer_schema::get(world, world.admin()) == 0, EDealerNotBalance);
 
         game_schema::set(world, player, vector<u8>[ran_num(random, ctx), ran_num(random, ctx)], vector<u8>[ran_num(random, ctx), ran_num(random, ctx)]);
     }
@@ -38,7 +36,7 @@ module Blackjack::blackjack_system {
     }
 
     public entry fun ran_card(world: &mut World, identity: String, random: &Random, ctx: &mut TxContext) {
-        let player = tx.sender();
+        let player = ctx.sender();
         assert!(player_schema::contains(world, player), ENotPlayer);
 
         let number = ran_num(random, ctx);
@@ -53,13 +51,22 @@ module Blackjack::blackjack_system {
         };
     }
 
-    public entry fun settlement(world: &mut World, identity: String, amount: u128, ctx: &mut TxContext) {
-        if (identity == string::utf8(b"player")) {
-            let player = tx.sender();
-            assert!(player_schema::contains(world, player), ENotPlayer);
-            player_schema::set(world, player, amount);
-        } else {
-            dealer_schema::set(world, world.admin(), 0);
-        };
+    public entry fun settlement(world: &mut World, changeAmount: u128, ctx: &mut TxContext) {
+        let player = ctx.sender();
+        assert!(player_schema::contains(world, player), ENotPlayer);
+        let amount = player_schema::get(world, player) + changeAmount;
+        player_schema::set(world, player, amount);
+    }
+
+    public entry fun recharge(world: &mut World, coin: Coin<SUI>, ctx: &mut TxContext) {
+        let amount = coin.value();
+        settlement(world, amount, ctx);
+        transfer::public_transfer(coin, world.admin());
+    }
+
+    public entry fun withdraw(coin: Coin<SUI>, ctx: &mut TxContext) {
+        let player = ctx.sender();
+        assert!(player_schema::contains(world, player), ENotPlayer);
+        transfer::public_transfer(coin, player);
     }
 }

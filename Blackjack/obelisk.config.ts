@@ -5,7 +5,6 @@ export const obeliskConfig = {
     description: 'Good Luck!',
     systems: ['blackjack_system'],
     schemas: {
-        dealer: "u128",
         player: "u128",
         game: {
             valueType: {
