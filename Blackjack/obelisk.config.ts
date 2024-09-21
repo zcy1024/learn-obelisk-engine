@@ -9,7 +9,8 @@ export const obeliskConfig = {
         game: {
             valueType: {
                 dealer: "vector<u8>",
-                player: "vector<u8>"
+                player: "vector<u8>",
+                bet: "u128"
             }
         }
     },

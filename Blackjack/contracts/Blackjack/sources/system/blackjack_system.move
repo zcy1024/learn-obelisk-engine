@@ -20,14 +20,14 @@ module Blackjack::blackjack_system {
         assert!(!game_schema::contains(world, player), EAlreadyRegister);
 
         player_schema::set(world, player, 0);
-        game_schema::set(world, player, vector<u8>[], vector<u8>[]);
+        game_schema::set(world, player, vector<u8>[], vector<u8>[], 0);
     }
 
-    public entry fun play_game(world: &mut World, random: &Random, ctx: &mut TxContext) {
+    public entry fun play_game(world: &mut World, random: &Random, bet: u128, ctx: &mut TxContext) {
         let player = ctx.sender();
         assert!(player_schema::get(world, player) == 0, ENotPreSaveBalance);
 
-        game_schema::set(world, player, vector<u8>[ran_num(random, ctx), ran_num(random, ctx)], vector<u8>[ran_num(random, ctx), ran_num(random, ctx)]);
+        game_schema::set(world, player, vector<u8>[ran_num(random, ctx), ran_num(random, ctx)], vector<u8>[ran_num(random, ctx), ran_num(random, ctx)], bet);
     }
 
     fun ran_num(random: &Random, ctx: &mut TxContext): u8 {

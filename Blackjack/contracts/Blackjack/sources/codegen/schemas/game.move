@@ -15,15 +15,18 @@ module Blackjack::game_schema {
 
 	// dealer
 	// player
+	// bet
 	public struct GameData has copy, drop , store {
 		dealer: vector<u8>,
-		player: vector<u8>
+		player: vector<u8>,
+		bet: u128
 	}
 
-	public fun new(dealer: vector<u8>, player: vector<u8>): GameData {
+	public fun new(dealer: vector<u8>, player: vector<u8>, bet: u128): GameData {
 		GameData {
 			dealer, 
-			player
+			player, 
+			bet
 		}
 	}
 
@@ -31,9 +34,9 @@ module Blackjack::game_schema {
 		schema::add<Table<address,GameData>>(_obelisk_world, SCHEMA_ID, table::new<address, GameData>(ctx), admin_cap);
 	}
 
-	public(package) fun set(_obelisk_world: &mut World, _obelisk_entity_key: address,  dealer: vector<u8>, player: vector<u8>) {
+	public(package) fun set(_obelisk_world: &mut World, _obelisk_entity_key: address,  dealer: vector<u8>, player: vector<u8>, bet: u128) {
 		let _obelisk_schema = schema::get_mut<Table<address,GameData>, AppKey>(app_key::new(), _obelisk_world, SCHEMA_ID);
-		let _obelisk_data = new( dealer, player);
+		let _obelisk_data = new( dealer, player, bet);
 		if(table::contains<address, GameData>(_obelisk_schema, _obelisk_entity_key)) {
 			*table::borrow_mut<address, GameData>(_obelisk_schema, _obelisk_entity_key) = _obelisk_data;
 		} else {
@@ -58,13 +61,22 @@ module Blackjack::game_schema {
 		events::emit_set(SCHEMA_ID, SCHEMA_TYPE, some(_obelisk_entity_key), *_obelisk_data)
 	}
 
-	public fun get(_obelisk_world: &World, _obelisk_entity_key: address): (vector<u8>,vector<u8>) {
+	public(package) fun set_bet(_obelisk_world: &mut World, _obelisk_entity_key: address, bet: u128) {
+		let _obelisk_schema = schema::get_mut<Table<address,GameData>, AppKey>(app_key::new(),_obelisk_world, SCHEMA_ID);
+		assert!(table::contains<address, GameData>(_obelisk_schema, _obelisk_entity_key), EEntityDoesNotExist);
+		let _obelisk_data = table::borrow_mut<address, GameData>(_obelisk_schema, _obelisk_entity_key);
+		_obelisk_data.bet = bet;
+		events::emit_set(SCHEMA_ID, SCHEMA_TYPE, some(_obelisk_entity_key), *_obelisk_data)
+	}
+
+	public fun get(_obelisk_world: &World, _obelisk_entity_key: address): (vector<u8>,vector<u8>,u128) {
 		let _obelisk_schema = schema::get<Table<address,GameData>>(_obelisk_world, SCHEMA_ID);
 		assert!(table::contains<address, GameData>(_obelisk_schema, _obelisk_entity_key), EEntityDoesNotExist);
 		let _obelisk_data = table::borrow<address, GameData>(_obelisk_schema, _obelisk_entity_key);
 		(
 			_obelisk_data.dealer,
-			_obelisk_data.player
+			_obelisk_data.player,
+			_obelisk_data.bet
 		)
 	}
 
@@ -80,6 +92,13 @@ module Blackjack::game_schema {
 		assert!(table::contains<address, GameData>(_obelisk_schema, _obelisk_entity_key), EEntityDoesNotExist);
 		let _obelisk_data = table::borrow<address, GameData>(_obelisk_schema, _obelisk_entity_key);
 		_obelisk_data.player
+	}
+
+	public fun get_bet(_obelisk_world: &World, _obelisk_entity_key: address): u128 {
+		let _obelisk_schema = schema::get<Table<address,GameData>>(_obelisk_world, SCHEMA_ID);
+		assert!(table::contains<address, GameData>(_obelisk_schema, _obelisk_entity_key), EEntityDoesNotExist);
+		let _obelisk_data = table::borrow<address, GameData>(_obelisk_schema, _obelisk_entity_key);
+		_obelisk_data.bet
 	}
 
 	public(package) fun remove(_obelisk_world: &mut World, _obelisk_entity_key: address) {
