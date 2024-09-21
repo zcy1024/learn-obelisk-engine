@@ -12,6 +12,8 @@ module Blackjack::blackjack_system {
     const ENotPreSaveBalance: u64 = 1;
     // error dealer don't have balance
     const EDealerNotBalance: u64 = 2;
+    // error not player
+    const ENotPlayer: u64 = 3;
 
     public entry fun register(world: &mut World, ctx: &mut TxContext) {
         let player = tx_context::sender(ctx);
@@ -37,7 +39,7 @@ module Blackjack::blackjack_system {
 
     public entry fun ran_card(world: &mut World, identity: String, random: &Random, ctx: &mut TxContext) {
         let player = tx.sender();
-        assert!(player_schema::get(world, player) == 0, ENotPreSaveBalance);
+        assert!(player_schema::contains(world, player), ENotPlayer);
 
         let number = ran_num(random, ctx);
         if (identity == string::utf8(b"player")) {
@@ -54,7 +56,7 @@ module Blackjack::blackjack_system {
     public entry fun settlement(world: &mut World, identity: String, amount: u128, ctx: &mut TxContext) {
         if (identity == string::utf8(b"player")) {
             let player = tx.sender();
-            assert!(player_schema::get(world, player) == 0, ENotPreSaveBalance);
+            assert!(player_schema::contains(world, player), ENotPlayer);
             player_schema::set(world, player, amount);
         } else {
             dealer_schema::set(world, world.admin(), 0);
