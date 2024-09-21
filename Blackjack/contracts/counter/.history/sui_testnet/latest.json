@@ -1,9 +1,0 @@
-{
-  "projectName": "counter",
-  "network": "testnet",
-  "packageId": "0x0b4e7ba2a2d98a3f5b8a24d794ef4993244f880e9419e83ffb6a1acb81e1e476",
-  "worldId": "0x050a096a3864de6d3c6098f1837ad3a49964e21a2d32d3bb58db49ce3ae496fe",
-  "upgradeCap": "0x7c2134b3be60367bba9fcc109fc33b647734aba867e7892114e169a00de99836",
-  "adminCap": "0xaf522a337a161ca5b3ceb3fcbe2ba036fbae436c7728f1764a70823042a36649",
-  "version": 1
-}
