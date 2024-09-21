@@ -9,8 +9,8 @@ module Blackjack::blackjack_system {
 
     // error already register
     const EAlreadyRegister: u64 = 0;
-    // error player don't have pre-save balance
-    const ENotPreSaveBalance: u64 = 1;
+    // error player don't have enough pre-save balance
+    const ENotEnoughPreSaveBalance: u64 = 1;
     // error not player
     const ENotPlayer: u64 = 2;
 
@@ -25,7 +25,7 @@ module Blackjack::blackjack_system {
 
     public entry fun play_game(world: &mut World, random: &Random, bet: u128, ctx: &mut TxContext) {
         let player = ctx.sender();
-        assert!(player_schema::get(world, player) == 0, ENotPreSaveBalance);
+        assert!(player_schema::get(world, player) >= bet, ENotEnoughPreSaveBalance);
 
         game_schema::set(world, player, vector<u8>[ran_num(random, ctx), ran_num(random, ctx)], vector<u8>[ran_num(random, ctx), ran_num(random, ctx)], bet);
     }
