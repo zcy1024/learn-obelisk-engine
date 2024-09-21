@@ -6,8 +6,9 @@ import * as React from "react";
 
 import { NETWORK, PACKAGE_ID, WORLD_ID } from '../../chain/config';
 import { loadMetadata, Obelisk, Transaction, TransactionResult } from '@0xobelisk/sui-client';
-import { ACCOUNT } from "../../chain/key";
+import { MNEMONIC, ACCOUNT } from "../../chain/key";
 import { ConnectButton, useSignAndExecuteTransaction, useCurrentAccount } from '@mysten/dapp-kit';
+import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
 
 function classNames(...classes) {
     return classes.filter(Boolean).join(' ')
@@ -67,7 +68,7 @@ const Header = () => {
                 {
                     onSuccess: async () => {
                         res = await obelisk.getEntity(WORLD_ID, "player", account.address)
-                        setBalance(Number(res[0]))
+                        setBalance(res ? Number(res[0]) : 0)
                     }
                 }
             )
@@ -103,6 +104,39 @@ const Header = () => {
         if (account)
             getBalance()
     }, [account])
+
+    const handlerWithdraw = async () => {
+        const metadata = await loadMetadata(NETWORK, PACKAGE_ID)
+        const obelisk = new Obelisk({
+            networkType: NETWORK,
+            packageId: PACKAGE_ID,
+            metadata: metadata,
+        })
+
+        const client = obelisk.client()
+        const keypair = Ed25519Keypair.deriveKeypair(MNEMONIC)
+        const balances = await client.getAllBalances({owner: keypair.getPublicKey().toSuiAddress()})
+        const [ sui_balance ] = balances.filter(balance => balance.coinType === "0x2::sui::SUI")
+        while (Number(sui_balance.totalBalance) < balance + 100000000)
+            await obelisk.requestFaucet()
+        if (Number(sui_balance.totalBalance) < 1000000000)
+            await obelisk.requestFaucet()
+
+        const tx = new Transaction()
+        const world = tx.object(WORLD_ID)
+        const coin = tx.splitCoins(tx.gas, [balance])
+
+        const params = [world, coin, tx.pure.address(account.address)]
+        await obelisk.tx.blackjack_system.withdraw(tx, params, undefined, true)
+
+        await client.signAndExecuteTransaction({
+            transaction: tx,
+            signer: keypair,
+            requestType: 'WaitForLocalExecution'
+        })
+
+        getBalance()
+    }
 
     return (
         <div className={classNames("py-4 ", "flex fixed mx-auto z-40 inset-x-0 px-4 sm:px-6 lg:px-8 xl:px-24 2xl:px-56  w-full justify-between transition-all duration-700 ease-in-out  items-center")}>
@@ -181,7 +215,7 @@ const Header = () => {
                         <button className="text-sm lg:text-base font-medium text-white transition duration-700 " onClick={handlerRecharge}>
                             Recharge
                         </button>
-                        <button className="text-sm lg:text-base font-medium text-white transition duration-700 ">
+                        <button className="text-sm lg:text-base font-medium text-white transition duration-700 " onClick={handlerWithdraw}>
                             Withdraw
                         </button>
                         <button className="text-sm lg:text-base font-medium text-white transition duration-700 " disabled>

@@ -13,6 +13,8 @@ module Blackjack::blackjack_system {
     const ENotEnoughPreSaveBalance: u64 = 1;
     // error not player
     const ENotPlayer: u64 = 2;
+    // error not enough balance to deduct
+    const EnotEnoughBalance: u64 = 3;
 
     public entry fun register(world: &mut World, ctx: &TxContext) {
         let player = tx_context::sender(ctx);
@@ -53,21 +55,29 @@ module Blackjack::blackjack_system {
         };
     }
 
-    public entry fun settlement(world: &mut World, changeAmount: u128, player: address) {
+    public entry fun settlement(world: &mut World, add: bool, changeAmount: u128, player: address) {
         assert!(player_schema::contains(world, player), ENotPlayer);
-        let amount = player_schema::get(world, player) + changeAmount;
+        let amount: u128;
+        if (add) {
+            amount = player_schema::get(world, player) + changeAmount;
+        } else {
+            let have = player_schema::get(world, player);
+            assert!(have >= changeAmount, EnotEnoughBalance);
+            amount = have - changeAmount;
+        };
         player_schema::set(world, player, amount);
     }
 
     public entry fun recharge(world: &mut World, coin: Coin<SUI>, recipient: address, ctx: &TxContext) {
         let amount = coin.value() as u128;
-        settlement(world, amount, ctx.sender());
+        settlement(world, true, amount, ctx.sender());
         transfer::public_transfer(coin, recipient);
     }
 
-    public entry fun withdraw(world: &mut World, coin: Coin<SUI>, ctx: &TxContext) {
-        let player = ctx.sender();
+    public entry fun withdraw(world: &mut World, coin: Coin<SUI>, player: address) {
         assert!(player_schema::contains(world, player), ENotPlayer);
+        let value = coin.value() as u128;
+        settlement(world, false, value, player);
         transfer::public_transfer(coin, player);
     }
 }
