@@ -26,8 +26,7 @@ module Blackjack::blackjack_system {
     }
 
     #[allow(lint(public_random))]
-    public entry fun play_game(world: &mut World, random: &Random, bet: u128, ctx: &mut TxContext) {
-        let player = ctx.sender();
+    public entry fun play_game(world: &mut World, random: &Random, bet: u128, player: address, ctx: &mut TxContext) {
         assert!(player_schema::get(world, player) >= bet, ENotEnoughPreSaveBalance);
 
         game_schema::set(world, player, vector<u8>[ran_num(random, ctx), ran_num(random, ctx)], vector<u8>[ran_num(random, ctx), ran_num(random, ctx)], bet);
@@ -39,8 +38,7 @@ module Blackjack::blackjack_system {
     }
 
     #[allow(lint(public_random))]
-    public entry fun ran_card(world: &mut World, identity: String, random: &Random, ctx: &mut TxContext) {
-        let player = ctx.sender();
+    public entry fun ran_card(world: &mut World, identity: String, random: &Random, player: address, ctx: &mut TxContext) {
         assert!(player_schema::contains(world, player), ENotPlayer);
 
         let number = ran_num(random, ctx);

@@ -1,5 +1,10 @@
 import { useEffect, useState, Dispatch, SetStateAction } from "react"
 
+import { NETWORK, PACKAGE_ID, WORLD_ID } from '../../chain/config';
+import { loadMetadata, Obelisk, Transaction, TransactionResult } from '@0xobelisk/sui-client';
+import { useCurrentAccount } from "@mysten/dapp-kit";
+import { PRIVATEKEY } from "../../chain/key";
+
 import Card from "../card"
 
 function dfs(index: number, point: number, cards: string[]): number[] {
@@ -39,17 +44,17 @@ type Props = {
     playerPoints?: number,
     setPlayerPoints?: Dispatch<SetStateAction<number>>,
     gameOver?: string,
-    setGameOver?: Dispatch<SetStateAction<string>>
+    setGameOver?: Dispatch<SetStateAction<string>>,
+    bet?: number
 }
 
-const Hand = ({ identity, playerOver, setPlayerOver, playerPoints, setPlayerPoints, gameOver, setGameOver }: Props) => {
+const Hand = ({ identity, playerOver, setPlayerOver, playerPoints, setPlayerPoints, gameOver, setGameOver, bet }: Props) => {
+    const account = useCurrentAccount()
+
     const [cards, setCards] = useState<string[]>([])
     const [points, setPoints] = useState<number>(0)
 
-    const randomCard = () => {
-        const point = Math.round(Math.random() * 15)
-        if (point >= 1 && point <= 10)
-            return point.toString()
+    const pointToCard = (point: number) => {
         if (point === 11)
             return "J"
         if (point === 12)
@@ -58,41 +63,67 @@ const Hand = ({ identity, playerOver, setPlayerOver, playerPoints, setPlayerPoin
             return "K"
         if (point === 14)
             return "A"
-        return randomCard()
+        return point.toString()
+    }
+
+    const refreshCards = async () => {
+        const metadata = await loadMetadata(NETWORK, PACKAGE_ID)
+        const obelisk = new Obelisk({
+            networkType: NETWORK,
+            packageId: PACKAGE_ID,
+            metadata: metadata,
+        })
+        // 0: enemy
+        // 1: player
+        // 2: bet
+        let res = await obelisk.getEntity(WORLD_ID, "game", account.address)
+        if (identity === "player")
+            setCards(res[1].map((point: number) => pointToCard(point)))
+        else
+            setCards(res[0].map((point: number) => pointToCard(point)))
     }
 
     useEffect(() => {
-        setCards([randomCard(), randomCard()])
+        refreshCards()
     }, [])
 
     useEffect(() => {
         const points = calPoints(cards)
         setPoints(points)
-        if (identity === "player" && points >= 21)
+        if (points >= 21)
             over()
     }, [cards])
 
-    const askForCards = () => {
-        setCards([
-            ...cards,
-            randomCard()
-        ])
+    const askForCards = async () => {
+        const metadata = await loadMetadata(NETWORK, PACKAGE_ID)
+        const obelisk = new Obelisk({
+            networkType: NETWORK,
+            packageId: PACKAGE_ID,
+            metadata: metadata,
+            secretKey: PRIVATEKEY
+        })
+        const tx = new Transaction();
+        const world = tx.object(WORLD_ID);
+        const tx_identity = tx.pure.string(identity)
+        const random = tx.object("0x8")
+        const player = tx.pure.address(account.address)
+        const params = [world, tx_identity, random, player];
+        (await obelisk.tx.blackjack_system.ran_card(tx, params, undefined, true)) as TransactionResult;
+        const response = await obelisk.signAndSendTxn(tx);
+        if (response.effects.status.status == 'success')
+            refreshCards()
     }
 
     const over = () => {
         setPlayerOver(true)
-        setPlayerPoints(points)
-    }
-
-    function delay(ms: number) {
-        return new Promise( resolve => setTimeout(resolve, ms) );
+        if (identity === "player")
+            setPlayerPoints(points)
     }
 
     const enemyTurn = async () => {
         if (gameOver)
             return
-        await delay(666)
-        askForCards()
+        await askForCards()
     }
 
     useEffect(() => {
@@ -127,13 +158,13 @@ const Hand = ({ identity, playerOver, setPlayerOver, playerPoints, setPlayerPoin
                     cards.map(card => <li className="relative flex-auto" key={new Date().getTime().toString() + Math.random().toString()}><Card content={card} /></li>)
                 }
             </ul>
-            <ul className={"absolute flex flex-col " + (identity === "player" ? "justify-between " : "justify-center ") +  "top-0 right-44 h-full py-10 text-white"}>
+            <ul className={"absolute flex flex-col " + (identity === "player" ? "justify-between " : "justify-center ") + "top-0 right-44 h-full py-10 text-white"}>
                 <li>Points: {points}</li>
                 {
                     identity === "player"
                     &&
                     <>
-                        <li>Bet: 0</li>
+                        <li>Bet: {bet}</li>
                         <li className={playerOver === false ? "cursor-pointer" : ""} onClick={() => playerOver === false ? askForCards() : {}}>Ask for cards</li>
                         <li className={playerOver === false ? "cursor-pointer" : ""}>Double down</li>
                         <li className={playerOver === false ? "cursor-pointer" : ""}>Admit defeat</li>

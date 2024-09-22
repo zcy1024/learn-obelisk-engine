@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Popover } from '@headlessui/react'
 import { AnimatePresence, motion } from 'framer-motion'
 import * as React from "react";
@@ -9,6 +9,8 @@ import { loadMetadata, Obelisk, Transaction, TransactionResult } from '@0xobelis
 import { MNEMONIC, ACCOUNT } from "../../chain/key";
 import { ConnectButton, useSignAndExecuteTransaction, useCurrentAccount } from '@mysten/dapp-kit';
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
+
+import { Balance } from "../../pages";
 
 function classNames(...classes) {
     return classes.filter(Boolean).join(' ')
@@ -42,7 +44,7 @@ function ChevronUpIcon(props) {
 
 
 const Header = () => {
-    const [balance, setBalance] = useState<number>(0)
+    const [balance, setBalance] = useContext(Balance)
     const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction()
     const account = useCurrentAccount()
 

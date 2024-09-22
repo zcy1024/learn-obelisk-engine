@@ -1,4 +1,16 @@
-const Settlement = ({ result, oneMoreRound }: { result: string, oneMoreRound: () => void }) => {
+import { useEffect, useContext } from "react"
+
+import { NETWORK, PACKAGE_ID, WORLD_ID } from '../../chain/config';
+import { loadMetadata, Obelisk, Transaction, TransactionResult } from '@0xobelisk/sui-client';
+import { useCurrentAccount } from "@mysten/dapp-kit";
+import { PRIVATEKEY } from "../../chain/key";
+
+import { Balance } from "../../pages";
+
+const Settlement = ({ result, oneMoreRound, bet }: { result: string, oneMoreRound: () => void, bet: number }) => {
+    const account = useCurrentAccount()
+    const [_, setBalance] = useContext(Balance)
+
     const getResultColor = () => {
         if (result === "LOSE")
             return "text-red-600"
@@ -6,6 +18,44 @@ const Settlement = ({ result, oneMoreRound }: { result: string, oneMoreRound: ()
             return "text-green-600"
         return ""
     }
+
+    const refreshBalance = async () => {
+        const metadata = await loadMetadata(NETWORK, PACKAGE_ID)
+        const obelisk = new Obelisk({
+            networkType: NETWORK,
+            packageId: PACKAGE_ID,
+            metadata: metadata,
+        })
+        let res = await obelisk.getEntity(WORLD_ID, "player", account.address)
+        setBalance(res ? Number(res[0]) : 0)
+    }
+
+    const betSettlement = async () => {
+        if (result === "DRAW")
+            return
+
+        const metadata = await loadMetadata(NETWORK, PACKAGE_ID)
+        const obelisk = new Obelisk({
+            networkType: NETWORK,
+            packageId: PACKAGE_ID,
+            metadata: metadata,
+            secretKey: PRIVATEKEY
+        })
+        const tx = new Transaction();
+        const world = tx.object(WORLD_ID);
+        const add = tx.pure.bool(result === "WIN")
+        const tx_bet = tx.pure.u128(bet)
+        const player = tx.pure.address(account.address)
+        const params = [world, add, tx_bet, player];
+        (await obelisk.tx.blackjack_system.settlement(tx, params, undefined, true)) as TransactionResult;
+        const response = await obelisk.signAndSendTxn(tx);
+        if (response.effects.status.status == 'success')
+            refreshBalance()
+    }
+
+    useEffect(() => {
+        betSettlement()
+    }, [])
 
     return (
         <div className="absolute flex flex-col justify-between content-between left-2/4 top-2/4 -translate-x-2/4 -translate-y-2/4 h-44 text-center text-white font-mono bg-black ">
