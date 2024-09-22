@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useState, useEffect, useContext } from "react";
+import { useEffect, useContext, Dispatch, SetStateAction } from "react";
 import { Popover } from '@headlessui/react'
 import { AnimatePresence, motion } from 'framer-motion'
 import * as React from "react";
@@ -9,7 +9,7 @@ import { loadMetadata, Obelisk, Transaction, TransactionResult } from '@0xobelis
 import { PRIVATEKEY, ACCOUNT } from "../../chain/key";
 import { ConnectButton, useSignAndExecuteTransaction, useCurrentAccount } from '@mysten/dapp-kit';
 
-import { Balance } from "../../pages";
+import { Balance, Mask } from "../../pages";
 
 function classNames(...classes) {
     return classes.filter(Boolean).join(' ')
@@ -42,8 +42,10 @@ function ChevronUpIcon(props) {
 }
 
 
-const Header = () => {
+const Header = ({ isNewUser }: { isNewUser: boolean }) => {
     const [balance, setBalance] = useContext(Balance)
+    const setIsMasked = useContext(Mask)
+
     const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction()
     const account = useCurrentAccount()
 
@@ -55,29 +57,15 @@ const Header = () => {
             metadata: metadata,
         })
         let res = await obelisk.getEntity(WORLD_ID, "player", account.address)
-        // new user
-        if (!res) {
-            const tx = new Transaction()
-            const world = tx.object(WORLD_ID)
-            const params = [world]
-            await obelisk.tx.blackjack_system.register(tx, params, undefined, true)
-            await signAndExecuteTransaction(
-                {
-                    transaction: tx,
-                    chain: `sui:${NETWORK}`
-                },
-                {
-                    onSuccess: async () => {
-                        res = await obelisk.getEntity(WORLD_ID, "player", account.address)
-                        setBalance(res ? Number(res[0]) : 0)
-                    }
-                }
-            )
-        }
-        setBalance(res ? Number(res[0]) : 0)
+        setBalance(Number(res[0]))
     }
 
     const handlerRecharge = async () => {
+        if (isNewUser)
+            return
+
+        setIsMasked(true)
+
         const metadata = await loadMetadata(NETWORK, PACKAGE_ID)
         const obelisk = new Obelisk({
             networkType: NETWORK,
@@ -99,14 +87,20 @@ const Header = () => {
                 onSuccess: () => getBalance()
             }
         )
+        setIsMasked(false)
     }
 
     useEffect(() => {
-        if (account)
+        if (!isNewUser)
             getBalance()
-    }, [account])
+    }, [isNewUser])
 
     const handlerWithdraw = async () => {
+        if (isNewUser || balance === 0)
+            return
+
+        setIsMasked(true)
+
         const metadata = await loadMetadata(NETWORK, PACKAGE_ID)
         const obelisk = new Obelisk({
             networkType: NETWORK,
@@ -130,6 +124,7 @@ const Header = () => {
         const response = await obelisk.signAndSendTxn(tx);
         if (response.effects.status.status == 'success')
             getBalance()
+        setIsMasked(false)
     }
 
     return (

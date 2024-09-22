@@ -34,7 +34,7 @@ module Blackjack::blackjack_system {
 
     fun ran_num(random: &Random, ctx: &mut TxContext): u8 {
         let mut randomGenerator = random.new_generator(ctx);
-        randomGenerator.generate_u8_in_range(1, 14)
+        randomGenerator.generate_u8_in_range(1, 13)
     }
 
     #[allow(lint(public_random))]

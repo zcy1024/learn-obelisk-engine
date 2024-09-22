@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext, Dispatch, SetStateAction } from "react";
 
 import { NETWORK, PACKAGE_ID, WORLD_ID } from '../../chain/config';
 import { loadMetadata, Obelisk, Transaction, TransactionResult } from '@0xobelisk/sui-client';
@@ -8,8 +8,9 @@ import { PRIVATEKEY } from "../../chain/key";
 import Card from "../../components/card";
 import Hand from "../../components/hand";
 import Settlement from "../../components/settlement";
+import { Balance, Mask } from "..";
 
-const Home = () => {
+const Home = ({ isNewUser }: { isNewUser: boolean }) => {
     const account = useCurrentAccount()
 
     const [play, setPlay] = useState<boolean>(false)
@@ -17,13 +18,18 @@ const Home = () => {
     const [playerPoints, setPlayerPoints] = useState<number>(0)
     const [gameOver, setGameOver] = useState<string>("")
     const bet = 666666
+    const [ready, setReady] = useState<boolean>(false)
 
     const startGame = () => {
+        if (isNewUser || !ready)
+            return
         setPlay(true)
         setPlayerOver(false)
         setPlayerPoints(0)
     }
 
+    const [balance, _] = useContext(Balance)
+    const setIsMasked = useContext(Mask)
     const playGame = async () => {
         const metadata = await loadMetadata(NETWORK, PACKAGE_ID)
         const obelisk = new Obelisk({
@@ -40,18 +46,25 @@ const Home = () => {
         const params = [world, random, tx_bet, player];
         (await obelisk.tx.blackjack_system.play_game(tx, params, undefined, true)) as TransactionResult;
         await obelisk.signAndSendTxn(tx);
+        setReady(true)
     }
 
-    const oneMoreRound = () => {
-        playGame()
+    const oneMoreRound = async () => {
+        setIsMasked(true)
+        setReady(false)
+        if (balance >= bet)
+            await playGame()
         setPlay(false)
         setGameOver("")
+        setIsMasked(false)
     }
 
     useEffect(() => {
-        if (account)
+        if (balance < bet)
+            return
+        if (!isNewUser && !play)
             playGame()
-    }, [account])
+    }, [isNewUser, balance])
 
     return (
         <>

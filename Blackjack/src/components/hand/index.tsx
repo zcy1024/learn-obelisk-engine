@@ -1,4 +1,4 @@
-import { useEffect, useState, Dispatch, SetStateAction } from "react"
+import { useEffect, useState, Dispatch, SetStateAction, useContext } from "react"
 
 import { NETWORK, PACKAGE_ID, WORLD_ID } from '../../chain/config';
 import { loadMetadata, Obelisk, Transaction, TransactionResult } from '@0xobelisk/sui-client';
@@ -6,6 +6,7 @@ import { useCurrentAccount } from "@mysten/dapp-kit";
 import { PRIVATEKEY } from "../../chain/key";
 
 import Card from "../card"
+import { Mask } from "../../pages";
 
 function dfs(index: number, point: number, cards: string[]): number[] {
     if (index === cards.length)
@@ -53,6 +54,7 @@ const Hand = ({ identity, playerOver, setPlayerOver, playerPoints, setPlayerPoin
 
     const [cards, setCards] = useState<string[]>([])
     const [points, setPoints] = useState<number>(0)
+    const setIsMasked = useContext(Mask)
 
     const pointToCard = (point: number) => {
         if (point === 11)
@@ -61,7 +63,7 @@ const Hand = ({ identity, playerOver, setPlayerOver, playerPoints, setPlayerPoin
             return "Q"
         if (point === 13)
             return "K"
-        if (point === 14)
+        if (point === 1)
             return "A"
         return point.toString()
     }
@@ -81,9 +83,12 @@ const Hand = ({ identity, playerOver, setPlayerOver, playerPoints, setPlayerPoin
             setCards(res[1].map((point: number) => pointToCard(point)))
         else
             setCards(res[0].map((point: number) => pointToCard(point)))
+
+        setIsMasked(false)
     }
 
     useEffect(() => {
+        setIsMasked(true)
         refreshCards()
     }, [])
 
@@ -95,6 +100,8 @@ const Hand = ({ identity, playerOver, setPlayerOver, playerPoints, setPlayerPoin
     }, [cards])
 
     const askForCards = async () => {
+        setIsMasked(true)
+
         const metadata = await loadMetadata(NETWORK, PACKAGE_ID)
         const obelisk = new Obelisk({
             networkType: NETWORK,
@@ -115,9 +122,9 @@ const Hand = ({ identity, playerOver, setPlayerOver, playerPoints, setPlayerPoin
     }
 
     const over = () => {
-        setPlayerOver(true)
         if (identity === "player")
-            setPlayerPoints(points)
+            setPlayerPoints(calPoints(cards))
+        setPlayerOver(true)
     }
 
     const enemyTurn = async () => {
