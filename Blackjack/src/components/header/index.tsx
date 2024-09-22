@@ -6,9 +6,8 @@ import * as React from "react";
 
 import { NETWORK, PACKAGE_ID, WORLD_ID } from '../../chain/config';
 import { loadMetadata, Obelisk, Transaction, TransactionResult } from '@0xobelisk/sui-client';
-import { MNEMONIC, ACCOUNT } from "../../chain/key";
+import { PRIVATEKEY, ACCOUNT } from "../../chain/key";
 import { ConnectButton, useSignAndExecuteTransaction, useCurrentAccount } from '@mysten/dapp-kit';
-import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
 
 import { Balance } from "../../pages";
 
@@ -113,12 +112,10 @@ const Header = () => {
             networkType: NETWORK,
             packageId: PACKAGE_ID,
             metadata: metadata,
+            secretKey: PRIVATEKEY
         })
 
-        const client = obelisk.client()
-        const keypair = Ed25519Keypair.deriveKeypair(MNEMONIC)
-        const balances = await client.getAllBalances({owner: keypair.getPublicKey().toSuiAddress()})
-        const [ sui_balance ] = balances.filter(balance => balance.coinType === "0x2::sui::SUI")
+        const sui_balance = await obelisk.getBalance()
         while (Number(sui_balance.totalBalance) < balance + 100000000)
             await obelisk.requestFaucet()
         if (Number(sui_balance.totalBalance) < 1000000000)
@@ -128,16 +125,11 @@ const Header = () => {
         const world = tx.object(WORLD_ID)
         const coin = tx.splitCoins(tx.gas, [balance])
 
-        const params = [world, coin, tx.pure.address(account.address)]
-        await obelisk.tx.blackjack_system.withdraw(tx, params, undefined, true)
-
-        await client.signAndExecuteTransaction({
-            transaction: tx,
-            signer: keypair,
-            requestType: 'WaitForLocalExecution'
-        })
-
-        getBalance()
+        const params = [world, coin, tx.pure.address(account.address)];
+        (await obelisk.tx.blackjack_system.withdraw(tx, params, undefined, true)) as TransactionResult;
+        const response = await obelisk.signAndSendTxn(tx);
+        if (response.effects.status.status == 'success')
+            getBalance()
     }
 
     return (
