@@ -7,7 +7,7 @@ import { PRIVATEKEY } from "../../chain/key";
 
 import { Balance, Mask } from "../../pages";
 
-let boundary = 666666
+let settlementFinished = false
 
 const Settlement = ({ result, oneMoreRound, bet }: { result: string, oneMoreRound: () => void, bet: number }) => {
     const account = useCurrentAccount()
@@ -25,7 +25,7 @@ const Settlement = ({ result, oneMoreRound, bet }: { result: string, oneMoreRoun
     const betSettlement = async () => {
         if (result === "LOSE") {
             setIsMasked(false)
-            boundary = 666666
+            settlementFinished = true
             return
         }
 
@@ -48,13 +48,13 @@ const Settlement = ({ result, oneMoreRound, bet }: { result: string, oneMoreRoun
         if (response.effects.status.status == 'success') {
             setBalance(Number(tx_balance[0]) + (result === "WIN" ? bet * 2 : bet))
             setIsMasked(false)
-            boundary = 666666
+            settlementFinished = true
         }
     }
 
     useEffect(() => {
         setIsMasked(true)
-        boundary = 666666 * 2
+        settlementFinished = false
         betSettlement()
     }, [])
 
@@ -62,7 +62,7 @@ const Settlement = ({ result, oneMoreRound, bet }: { result: string, oneMoreRoun
         <div className="absolute flex flex-col justify-between content-between left-2/4 top-2/4 -translate-x-2/4 -translate-y-2/4 h-44 text-center text-white font-mono bg-black ">
             <h3 className={"text-4xl " + getResultColor()}>{result}</h3>
             <p className="text-xl">Profit/Deficit: 1000000000</p>
-            <button className="animate-bounce w-36 bg-sky-500/75 self-center rounded-lg" onClick={() => balance >= boundary ? oneMoreRound() : {}}>One More Round</button>
+            <button className="animate-bounce w-36 bg-sky-500/75 self-center rounded-lg" onClick={oneMoreRound} disabled={!settlementFinished}>One More Round</button>
         </div>
     )
 }
