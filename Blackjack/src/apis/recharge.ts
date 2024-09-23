@@ -42,7 +42,7 @@ export default async function recharge({ account, signAndExecuteTransaction, set
             chain: `sui:${NETWORK}`
         },
         {
-            onSuccess: () => getBalance({ account, setBalance })
+            onSuccess: async () => await getBalance({ account, setBalance })
         }
     )
 }

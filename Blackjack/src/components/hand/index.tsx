@@ -1,8 +1,8 @@
 import { useEffect, useState, Dispatch, SetStateAction, useContext } from "react"
 import { useCurrentAccount } from "@mysten/dapp-kit";
 import Card from "../card"
-import { Mask } from "../../pages";
-import { calPoints, refreshCards as tx_refreshCards, askForCards as tx_askForCards, checkGameOver } from "../../apis";
+import { Balance, Mask } from "../../pages";
+import { calPoints, refreshCards as tx_refreshCards, askForCards as tx_askForCards, checkGameOver, getBalance, doubleDown as tx_doubleDown } from "../../apis";
 
 type Props = {
     identity: string,
@@ -12,14 +12,16 @@ type Props = {
     setPlayerPoints?: Dispatch<SetStateAction<number>>,
     gameOver?: string,
     setGameOver?: Dispatch<SetStateAction<string>>,
-    bet?: number
+    bet?: number,
+    setBet?: Dispatch<SetStateAction<number>>
 }
 
-const Hand = ({ identity, playerOver, setPlayerOver, playerPoints, setPlayerPoints, gameOver, setGameOver, bet }: Props) => {
+const Hand = ({ identity, playerOver, setPlayerOver, playerPoints, setPlayerPoints, gameOver, setGameOver, bet, setBet }: Props) => {
     const account = useCurrentAccount()
 
     const [cards, setCards] = useState<string[]>([])
     const [points, setPoints] = useState<number>(0)
+    const [_, setBalance] = useContext(Balance)
     const setIsMasked = useContext(Mask)
 
     const refreshCards = async () => {
@@ -34,7 +36,7 @@ const Hand = ({ identity, playerOver, setPlayerOver, playerPoints, setPlayerPoin
     useEffect(() => {
         const points = calPoints(cards)
         setPoints(points)
-        if (points >= 21)
+        if (points >= 21 || identity === "player" && bet > 666666)
             over()
     }, [cards])
 
@@ -67,6 +69,14 @@ const Hand = ({ identity, playerOver, setPlayerOver, playerPoints, setPlayerPoin
         setPlayerOver(true)
     }
 
+    const doubleDown = async () => {
+        if (cards.length > 2)
+            return
+        setIsMasked(true)
+        await tx_doubleDown({ account, bet, setBet, setBalance, setCards, identity })
+        setIsMasked(false)
+    }
+
     return (
         <div className={identity === "player" ? "relative h-1/3 top-2/3" : "relative h-1/3 bottom-1/3"}>
             <ul className="flex h-full px-60">
@@ -74,7 +84,7 @@ const Hand = ({ identity, playerOver, setPlayerOver, playerPoints, setPlayerPoin
                     cards.map(card => <li className="relative flex-auto" key={new Date().getTime().toString() + Math.random().toString()}><Card content={card} /></li>)
                 }
             </ul>
-            <ul className={"absolute flex flex-col " + (identity === "player" ? "justify-between " : "justify-center ") + "top-0 right-44 h-full py-10 text-white"}>
+            <ul className={"absolute flex flex-col w-1/6 " + (identity === "player" ? "justify-between " : "justify-center ") + "top-0 right-0 h-full py-10 text-white"}>
                 <li>Points: {points}</li>
                 {
                     identity === "player"
@@ -82,7 +92,7 @@ const Hand = ({ identity, playerOver, setPlayerOver, playerPoints, setPlayerPoin
                     <>
                         <li>Bet: {bet}</li>
                         <li className={playerOver === false ? "cursor-pointer" : ""} onClick={() => playerOver === false ? askForCards() : {}}>Ask for cards</li>
-                        <li className={playerOver === false ? "cursor-pointer" : ""}>Double down</li>
+                        <li className={playerOver === false ? "cursor-pointer" : ""} onClick={doubleDown}>Double down</li>
                         <li className={playerOver === false ? "cursor-pointer" : ""} onClick={admitDefeat}>Admit defeat</li>
                         <li className={playerOver === false ? "cursor-pointer" : ""} onClick={over}>Over</li>
                     </>

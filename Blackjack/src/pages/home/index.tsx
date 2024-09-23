@@ -13,7 +13,7 @@ const Home = ({ isNewUser }: { isNewUser: boolean }) => {
     const [playerOver, setPlayerOver] = useState<boolean>(false)
     const [playerPoints, setPlayerPoints] = useState<number>(0)
     const [gameOver, setGameOver] = useState<string>("")
-    const bet = 666666
+    const [bet, setBet] = useState<number>(666666)
     const [ready, setReady] = useState<boolean>(false)
 
     const [balance, setBalance] = useContext(Balance)
@@ -31,6 +31,7 @@ const Home = ({ isNewUser }: { isNewUser: boolean }) => {
 
     const oneMoreRound = async () => {
         setIsMasked(true)
+        setBet(666666)
         setReady(balance >= bet)
         setPlay(false)
         setGameOver("")
@@ -51,7 +52,7 @@ const Home = ({ isNewUser }: { isNewUser: boolean }) => {
                 play
                 &&
                 <>
-                    <Hand identity="player" playerOver={playerOver} setPlayerOver={setPlayerOver} setPlayerPoints={setPlayerPoints} setGameOver={setGameOver} bet={bet} />
+                    <Hand identity="player" playerOver={playerOver} setPlayerOver={setPlayerOver} setPlayerPoints={setPlayerPoints} setGameOver={setGameOver} bet={bet} setBet={setBet} />
                     <Hand identity="enemy" playerOver={playerOver} setPlayerOver={setPlayerOver} playerPoints={playerPoints} gameOver={gameOver} setGameOver={setGameOver} />
                 </>
             }

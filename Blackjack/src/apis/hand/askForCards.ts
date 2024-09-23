@@ -37,5 +37,5 @@ export default async function askForCards({ account, setCards, identity }: Props
     (await obelisk.tx.blackjack_system.ran_card(tx, params, undefined, true)) as TransactionResult;
     const response = await obelisk.signAndSendTxn(tx);
     if (response.effects.status.status == 'success')
-        refreshCards({ account, setCards, identity })
+        await refreshCards({ account, setCards, identity })
 }

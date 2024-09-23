@@ -3,7 +3,7 @@ import getBalance from "./getBalance"
 import recharge from "./recharge"
 import withdraw from "./withdraw"
 import deposit from "./deposit"
-import { calPoints, refreshCards, askForCards, checkGameOver } from "./hand"
+import { calPoints, refreshCards, askForCards, checkGameOver, doubleDown } from "./hand"
 import betSettlement from "./betSettlement"
 
 export {
@@ -16,5 +16,6 @@ export {
     refreshCards,
     askForCards,
     checkGameOver,
-    betSettlement
+    betSettlement,
+    doubleDown
 }

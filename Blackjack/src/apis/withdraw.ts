@@ -43,5 +43,5 @@ export default async function withdraw({ account, balance, setBalance }: Props) 
     (await obelisk.tx.blackjack_system.withdraw(tx, params, undefined, true)) as TransactionResult;
     const response = await obelisk.signAndSendTxn(tx);
     if (response.effects.status.status == 'success')
-        getBalance({ account, setBalance })
+        await getBalance({ account, setBalance })
 }
