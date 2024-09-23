@@ -17,6 +17,8 @@ function dfs(index: number, point: number, cards: string[]): number[] {
     }
     if (cards[index] === "J" || cards[index] === "Q" || cards[index] === "K")
         return dfs(index + 1, point + 10, cards)
+    if (cards[index] === "*")
+        return dfs(index + 1, point, cards)
     return dfs(index + 1, point + Number(cards[index]), cards)
 }
 
@@ -65,6 +67,8 @@ const Hand = ({ identity, playerOver, setPlayerOver, playerPoints, setPlayerPoin
             return "K"
         if (point === 1)
             return "A"
+        if (point === 0)
+            return "*"
         return point.toString()
     }
 
@@ -82,7 +86,7 @@ const Hand = ({ identity, playerOver, setPlayerOver, playerPoints, setPlayerPoin
         if (identity === "player")
             setCards(res[1].map((point: number) => pointToCard(point)))
         else
-            setCards(res[0].map((point: number) => pointToCard(point)))
+            setCards(res[0].reverse().map((point: number) => pointToCard(point)))
 
         setIsMasked(false)
     }

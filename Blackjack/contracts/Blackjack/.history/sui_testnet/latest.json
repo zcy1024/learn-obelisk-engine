@@ -1,9 +1,9 @@
 {
   "projectName": "Blackjack",
   "network": "testnet",
-  "packageId": "0x39e74e997e143a15e42efb1d4d9257cf3687b6dfbc272cf6898a9f20a44a637e",
-  "worldId": "0x5af085dfb52876385a087498ef5afb65e7d8646315a2de026a9e8dad6d35785e",
-  "upgradeCap": "0x509c8ed55770c9a9556f662f01ad4a846002e4b91f01b7b578744ef08717b907",
-  "adminCap": "0x9f58f6f9593ba5dfe4be3ede096f0a246eaab1767c0f0370913c1aedceabef13",
+  "packageId": "0xcd54a9b654fa23d2aefe6d22bc33aca6c409c52dbc04b09549ac0946a722d223",
+  "worldId": "0xd09963564d97a0b70f9dc61bfd0bf3f3002cff60d52ea8b78b1aa1932765c3bd",
+  "upgradeCap": "0xc072795738eb47ef3475c289a768491ef38c51085347cd4e8ad30e2bc2325fd7",
+  "adminCap": "0xfac6ffb231905d067585cf2c5f135347d68cf9373febde91ebccacf2baa4b08e",
   "version": 1
 }

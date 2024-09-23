@@ -29,7 +29,7 @@ module Blackjack::blackjack_system {
     public entry fun play_game(world: &mut World, random: &Random, bet: u128, player: address, ctx: &mut TxContext) {
         assert!(player_schema::get(world, player) >= bet, ENotEnoughPreSaveBalance);
 
-        game_schema::set(world, player, vector<u8>[ran_num(random, ctx), ran_num(random, ctx)], vector<u8>[ran_num(random, ctx), ran_num(random, ctx)], bet);
+        game_schema::set(world, player, vector<u8>[0, ran_num(random, ctx)], vector<u8>[ran_num(random, ctx), ran_num(random, ctx)], bet);
     }
 
     fun ran_num(random: &Random, ctx: &mut TxContext): u8 {
@@ -48,7 +48,14 @@ module Blackjack::blackjack_system {
             game_schema::set_player(world, player, cards);
         } else {
             let mut cards = game_schema::get_dealer(world, player);
-            cards.push_back(number);
+            if (cards[0] == 0) {
+                cards.reverse();
+                cards.pop_back();
+                cards.push_back(number);
+                cards.reverse();
+            } else {
+                cards.push_back(number);
+            };
             game_schema::set_dealer(world, player, cards);
         };
     }
