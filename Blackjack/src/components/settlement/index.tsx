@@ -3,7 +3,7 @@ import { useCurrentAccount } from "@mysten/dapp-kit";
 import { Balance, Mask } from "../../pages";
 import { betSettlement as tx_betSettlement } from "../../apis";
 
-let settlementFinished = false
+let settlementFinished = true
 
 const Settlement = ({ result, oneMoreRound, bet }: { result: string, oneMoreRound: () => void, bet: number }) => {
     const account = useCurrentAccount()
@@ -25,6 +25,8 @@ const Settlement = ({ result, oneMoreRound, bet }: { result: string, oneMoreRoun
     }
 
     useEffect(() => {
+        if (result === "LOSE")
+            return
         setIsMasked(true)
         settlementFinished = false
         betSettlement()

@@ -20,9 +20,6 @@ type Props = {
 }
 
 export default async function betSettlement({ account, result, bet, setBalance }: Props) {
-    if (result === "LOSE")
-        return
-
     const metadata = await loadMetadata(NETWORK, PACKAGE_ID)
     const obelisk = new Obelisk({
         networkType: NETWORK,

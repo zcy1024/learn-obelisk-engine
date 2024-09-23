@@ -41,6 +41,7 @@ const Hand = ({ identity, playerOver, setPlayerOver, playerPoints, setPlayerPoin
     const askForCards = async () => {
         setIsMasked(true)
         await tx_askForCards({ account, setCards, identity })
+        setIsMasked(false)
     }
 
     const over = () => {
@@ -61,6 +62,11 @@ const Hand = ({ identity, playerOver, setPlayerOver, playerPoints, setPlayerPoin
         enemyTurn()
     }, [playerOver, cards])
 
+    const admitDefeat = () => {
+        setGameOver("LOSE")
+        setPlayerOver(true)
+    }
+
     return (
         <div className={identity === "player" ? "relative h-1/3 top-2/3" : "relative h-1/3 bottom-1/3"}>
             <ul className="flex h-full px-60">
@@ -77,7 +83,7 @@ const Hand = ({ identity, playerOver, setPlayerOver, playerPoints, setPlayerPoin
                         <li>Bet: {bet}</li>
                         <li className={playerOver === false ? "cursor-pointer" : ""} onClick={() => playerOver === false ? askForCards() : {}}>Ask for cards</li>
                         <li className={playerOver === false ? "cursor-pointer" : ""}>Double down</li>
-                        <li className={playerOver === false ? "cursor-pointer" : ""}>Admit defeat</li>
+                        <li className={playerOver === false ? "cursor-pointer" : ""} onClick={admitDefeat}>Admit defeat</li>
                         <li className={playerOver === false ? "cursor-pointer" : ""} onClick={over}>Over</li>
                     </>
                 }
