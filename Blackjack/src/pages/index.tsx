@@ -1,13 +1,10 @@
 import type { NextPage } from 'next';
 import Home from "./home";
-
 import Heads from "../components/head";
 import Header from "../components/header";
-
 import { useState, createContext, Dispatch, SetStateAction, useEffect } from "react";
-import { NETWORK, PACKAGE_ID, WORLD_ID } from '../chain/config';
-import { loadMetadata, Obelisk, Transaction } from '@0xobelisk/sui-client';
-import { useSignAndExecuteTransaction, useCurrentAccount } from '@mysten/dapp-kit';
+import { useCurrentAccount, useSignAndExecuteTransaction } from '@mysten/dapp-kit';
+import { checkNewUser } from '../apis';
 
 export const Balance = createContext<[number, Dispatch<SetStateAction<number>>]>(null)
 export const Mask = createContext<Dispatch<SetStateAction<boolean>>>(null)
@@ -20,41 +17,9 @@ const IndexPage: NextPage = () => {
     const [isMasked, setIsMasked] = useState<boolean>(false)
     const [isNewUser, setIsNewUser] = useState<boolean>(true)
 
-    const checkNewUser = async () => {
-        const metadata = await loadMetadata(NETWORK, PACKAGE_ID)
-        const obelisk = new Obelisk({
-            networkType: NETWORK,
-            packageId: PACKAGE_ID,
-            metadata: metadata,
-        })
-        let res = await obelisk.getEntity(WORLD_ID, "player", account.address)
-        // new user
-        if (!res) {
-            const tx = new Transaction()
-            const world = tx.object(WORLD_ID)
-            const params = [world]
-            await obelisk.tx.blackjack_system.register(tx, params, undefined, true)
-            await signAndExecuteTransaction(
-                {
-                    transaction: tx,
-                    chain: `sui:${NETWORK}`
-                },
-                {
-                    onSuccess: async () => {
-                        res = await obelisk.getEntity(WORLD_ID, "player", account.address)
-                        setBalance(res ? Number(res[0]) : 0)
-                        setIsNewUser(false)
-                    }
-                }
-            )
-        } else {
-            setIsNewUser(false)
-        }
-    }
-
     useEffect(() => {
         if (account)
-            checkNewUser()
+            checkNewUser({ account, signAndExecuteTransaction, setBalance, setIsNewUser })
     }, [account])
 
     return (

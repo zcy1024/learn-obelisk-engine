@@ -37,6 +37,7 @@
   "devDependencies": {
     "@headlessui/react": "^1.7.19",
     "@heroicons/react": "^2.1.5",
+    "@mysten/wallet-standard": "^0.13.4",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/forms": "^0.5.9",
     "@tailwindcss/line-clamp": "^0.4.4",

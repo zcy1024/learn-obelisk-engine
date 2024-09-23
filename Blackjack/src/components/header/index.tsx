@@ -1,15 +1,10 @@
 import Link from "next/link";
-import { useEffect, useContext, Dispatch, SetStateAction } from "react";
+import { useEffect, useContext } from "react";
 import { Popover } from '@headlessui/react'
 import { AnimatePresence, motion } from 'framer-motion'
-import * as React from "react";
-
-import { NETWORK, PACKAGE_ID, WORLD_ID } from '../../chain/config';
-import { loadMetadata, Obelisk, Transaction, TransactionResult } from '@0xobelisk/sui-client';
-import { PRIVATEKEY, ACCOUNT } from "../../chain/key";
 import { ConnectButton, useSignAndExecuteTransaction, useCurrentAccount } from '@mysten/dapp-kit';
-
 import { Balance, Mask } from "../../pages";
+import { getBalance, recharge, withdraw } from "../../apis";
 
 function classNames(...classes) {
     return classes.filter(Boolean).join(' ')
@@ -46,84 +41,27 @@ const Header = ({ isNewUser }: { isNewUser: boolean }) => {
     const [balance, setBalance] = useContext(Balance)
     const setIsMasked = useContext(Mask)
 
-    const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction()
     const account = useCurrentAccount()
-
-    const getBalance = async () => {
-        const metadata = await loadMetadata(NETWORK, PACKAGE_ID)
-        const obelisk = new Obelisk({
-            networkType: NETWORK,
-            packageId: PACKAGE_ID,
-            metadata: metadata,
-        })
-        let res = await obelisk.getEntity(WORLD_ID, "player", account.address)
-        setBalance(Number(res[0]))
-    }
+    const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction()
 
     const handlerRecharge = async () => {
         if (isNewUser)
             return
-
         setIsMasked(true)
-
-        const metadata = await loadMetadata(NETWORK, PACKAGE_ID)
-        const obelisk = new Obelisk({
-            networkType: NETWORK,
-            packageId: PACKAGE_ID,
-            metadata: metadata,
-        })
-        const tx = new Transaction()
-        const world = tx.object(WORLD_ID)
-        const chargeAmount = 1000000000
-        const coin = tx.splitCoins(tx.gas, [chargeAmount])
-        const params = [world, coin, tx.pure.address(ACCOUNT)]
-        await obelisk.tx.blackjack_system.recharge(tx, params, undefined, true)
-        await signAndExecuteTransaction(
-            {
-                transaction: tx,
-                chain: `sui:${NETWORK}`
-            },
-            {
-                onSuccess: () => getBalance()
-            }
-        )
+        await recharge({ account, signAndExecuteTransaction, setBalance })
         setIsMasked(false)
     }
 
     useEffect(() => {
         if (!isNewUser)
-            getBalance()
+            getBalance({ account, setBalance })
     }, [isNewUser])
 
     const handlerWithdraw = async () => {
         if (isNewUser || balance === 0)
             return
-
         setIsMasked(true)
-
-        const metadata = await loadMetadata(NETWORK, PACKAGE_ID)
-        const obelisk = new Obelisk({
-            networkType: NETWORK,
-            packageId: PACKAGE_ID,
-            metadata: metadata,
-            secretKey: PRIVATEKEY
-        })
-
-        const sui_balance = await obelisk.getBalance()
-        while (Number(sui_balance.totalBalance) < balance + 100000000)
-            await obelisk.requestFaucet()
-        if (Number(sui_balance.totalBalance) < 1000000000)
-            await obelisk.requestFaucet()
-
-        const tx = new Transaction()
-        const world = tx.object(WORLD_ID)
-        const coin = tx.splitCoins(tx.gas, [balance])
-
-        const params = [world, coin, tx.pure.address(account.address)];
-        (await obelisk.tx.blackjack_system.withdraw(tx, params, undefined, true)) as TransactionResult;
-        const response = await obelisk.signAndSendTxn(tx);
-        if (response.effects.status.status == 'success')
-            getBalance()
+        await withdraw({ account, balance, setBalance })
         setIsMasked(false)
     }
 

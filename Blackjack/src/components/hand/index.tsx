@@ -1,44 +1,8 @@
 import { useEffect, useState, Dispatch, SetStateAction, useContext } from "react"
-
-import { NETWORK, PACKAGE_ID, WORLD_ID } from '../../chain/config';
-import { loadMetadata, Obelisk, Transaction, TransactionResult } from '@0xobelisk/sui-client';
 import { useCurrentAccount } from "@mysten/dapp-kit";
-import { PRIVATEKEY } from "../../chain/key";
-
 import Card from "../card"
 import { Mask } from "../../pages";
-
-function dfs(index: number, point: number, cards: string[]): number[] {
-    if (index === cards.length)
-        return [point]
-    if (cards[index] === "A") {
-        const res = dfs(index + 1, point + 1, cards)
-        return res.concat(dfs(index + 1, point + 11, cards))
-    }
-    if (cards[index] === "J" || cards[index] === "Q" || cards[index] === "K")
-        return dfs(index + 1, point + 10, cards)
-    if (cards[index] === "*")
-        return dfs(index + 1, point, cards)
-    return dfs(index + 1, point + Number(cards[index]), cards)
-}
-
-function calPoints(cards: string[]): number {
-    if (cards.length === 0)
-        return 0
-    const points = dfs(0, 0, cards)
-    const sorted = points.sort((a, b) => b - a)
-    let res = sorted[0]
-    let index = 1
-    while (res > 21 && index < sorted.length) {
-        if (sorted[index] > 21) {
-            index++
-            continue
-        }
-        res = sorted[index]
-        break
-    }
-    return res
-}
+import { calPoints, refreshCards as tx_refreshCards, askForCards as tx_askForCards, checkGameOver } from "../../apis";
 
 type Props = {
     identity: string,
@@ -58,36 +22,8 @@ const Hand = ({ identity, playerOver, setPlayerOver, playerPoints, setPlayerPoin
     const [points, setPoints] = useState<number>(0)
     const setIsMasked = useContext(Mask)
 
-    const pointToCard = (point: number) => {
-        if (point === 11)
-            return "J"
-        if (point === 12)
-            return "Q"
-        if (point === 13)
-            return "K"
-        if (point === 1)
-            return "A"
-        if (point === 0)
-            return "*"
-        return point.toString()
-    }
-
     const refreshCards = async () => {
-        const metadata = await loadMetadata(NETWORK, PACKAGE_ID)
-        const obelisk = new Obelisk({
-            networkType: NETWORK,
-            packageId: PACKAGE_ID,
-            metadata: metadata,
-        })
-        // 0: enemy
-        // 1: player
-        // 2: bet
-        let res = await obelisk.getEntity(WORLD_ID, "game", account.address)
-        if (identity === "player")
-            setCards(res[1].map((point: number) => pointToCard(point)))
-        else
-            setCards(res[0].reverse().map((point: number) => pointToCard(point)))
-
+        await tx_refreshCards({ account, setCards, identity })
         setIsMasked(false)
     }
 
@@ -104,24 +40,7 @@ const Hand = ({ identity, playerOver, setPlayerOver, playerPoints, setPlayerPoin
 
     const askForCards = async () => {
         setIsMasked(true)
-
-        const metadata = await loadMetadata(NETWORK, PACKAGE_ID)
-        const obelisk = new Obelisk({
-            networkType: NETWORK,
-            packageId: PACKAGE_ID,
-            metadata: metadata,
-            secretKey: PRIVATEKEY
-        })
-        const tx = new Transaction();
-        const world = tx.object(WORLD_ID);
-        const tx_identity = tx.pure.string(identity)
-        const random = tx.object("0x8")
-        const player = tx.pure.address(account.address)
-        const params = [world, tx_identity, random, player];
-        (await obelisk.tx.blackjack_system.ran_card(tx, params, undefined, true)) as TransactionResult;
-        const response = await obelisk.signAndSendTxn(tx);
-        if (response.effects.status.status == 'success')
-            refreshCards()
+        await tx_askForCards({ account, setCards, identity })
     }
 
     const over = () => {
@@ -137,27 +56,8 @@ const Hand = ({ identity, playerOver, setPlayerOver, playerPoints, setPlayerPoin
     }
 
     useEffect(() => {
-        if (identity === "player" || playerOver === false || gameOver)
+        if (checkGameOver({ identity, playerOver, gameOver, cards, playerPoints, setGameOver }))
             return
-        const points = calPoints(cards)
-        if (points > playerPoints || playerPoints >= 21) {
-            if (playerPoints > 21)
-                setGameOver("LOSE")
-            else if (playerPoints === points)
-                setGameOver("DRAW")
-            else if (points > 21)
-                setGameOver("WIN")
-            else
-                setGameOver(playerPoints > points ? "WIN" : "LOSE")
-            return
-        }
-        if (points === playerPoints && 21 - points <= 5) {
-            const dx = 21 - points
-            if (Math.random() * (dx + 1) <= dx / 2) {
-                setGameOver("DRAW")
-                return
-            }
-        }
         enemyTurn()
     }, [playerOver, cards])
 

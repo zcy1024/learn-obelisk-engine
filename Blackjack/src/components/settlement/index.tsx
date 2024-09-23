@@ -1,17 +1,13 @@
 import { useEffect, useContext } from "react"
-
-import { NETWORK, PACKAGE_ID, WORLD_ID } from '../../chain/config';
-import { loadMetadata, Obelisk, Transaction, TransactionResult } from '@0xobelisk/sui-client';
 import { useCurrentAccount } from "@mysten/dapp-kit";
-import { PRIVATEKEY } from "../../chain/key";
-
 import { Balance, Mask } from "../../pages";
+import { betSettlement as tx_betSettlement } from "../../apis";
 
 let settlementFinished = false
 
 const Settlement = ({ result, oneMoreRound, bet }: { result: string, oneMoreRound: () => void, bet: number }) => {
     const account = useCurrentAccount()
-    const [balance, setBalance] = useContext(Balance)
+    const [_, setBalance] = useContext(Balance)
     const setIsMasked = useContext(Mask)
 
     const getResultColor = () => {
@@ -23,33 +19,9 @@ const Settlement = ({ result, oneMoreRound, bet }: { result: string, oneMoreRoun
     }
 
     const betSettlement = async () => {
-        if (result === "LOSE") {
-            setIsMasked(false)
-            settlementFinished = true
-            return
-        }
-
-        const metadata = await loadMetadata(NETWORK, PACKAGE_ID)
-        const obelisk = new Obelisk({
-            networkType: NETWORK,
-            packageId: PACKAGE_ID,
-            metadata: metadata,
-            secretKey: PRIVATEKEY
-        })
-        const tx = new Transaction();
-        const world = tx.object(WORLD_ID);
-        const tx_balance = await obelisk.getEntity(WORLD_ID, "player", account.address)
-        const add = tx.pure.bool(true)
-        const tx_bet = tx.pure.u128(result === "WIN" ? bet * 2 : bet)
-        const player = tx.pure.address(account.address)
-        const params = [world, add, tx_bet, player];
-        (await obelisk.tx.blackjack_system.settlement(tx, params, undefined, true)) as TransactionResult;
-        const response = await obelisk.signAndSendTxn(tx);
-        if (response.effects.status.status == 'success') {
-            setBalance(Number(tx_balance[0]) + (result === "WIN" ? bet * 2 : bet))
-            setIsMasked(false)
-            settlementFinished = true
-        }
+        await tx_betSettlement({ account, result, bet, setBalance })
+        setIsMasked(false)
+        settlementFinished = true
     }
 
     useEffect(() => {
