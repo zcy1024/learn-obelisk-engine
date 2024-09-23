@@ -20,16 +20,40 @@ const Home = ({ isNewUser }: { isNewUser: boolean }) => {
     const bet = 666666
     const [ready, setReady] = useState<boolean>(false)
 
-    const startGame = () => {
-        if (isNewUser || !ready)
-            return
-        setPlay(true)
-        setPlayerOver(false)
-        setPlayerPoints(0)
+    const [balance, setBalance] = useContext(Balance)
+    const setIsMasked = useContext(Mask)
+
+    const deposit = async () => {
+        const metadata = await loadMetadata(NETWORK, PACKAGE_ID)
+        const obelisk = new Obelisk({
+            networkType: NETWORK,
+            packageId: PACKAGE_ID,
+            metadata: metadata,
+            secretKey: PRIVATEKEY
+        })
+        const tx = new Transaction();
+        const world = tx.object(WORLD_ID);
+        const tx_balance = await obelisk.getEntity(WORLD_ID, "player", account.address);
+        const add = tx.pure.bool(false)
+        const tx_bet = tx.pure.u128(bet)
+        const player = tx.pure.address(account.address)
+        const params = [world, add, tx_bet, player];
+        (await obelisk.tx.blackjack_system.settlement(tx, params, undefined, true)) as TransactionResult;
+        const response = await obelisk.signAndSendTxn(tx);
+        if (response.effects.status.status == 'success')
+            setBalance(Number(tx_balance[0]) - bet)
     }
 
-    const [balance, _] = useContext(Balance)
-    const setIsMasked = useContext(Mask)
+    const startGame = async () => {
+        if (isNewUser || !ready)
+            return
+        setIsMasked(true)
+        setPlayerOver(false)
+        setPlayerPoints(0)
+        await deposit()
+        setPlay(true)
+    }
+
     const playGame = async () => {
         const metadata = await loadMetadata(NETWORK, PACKAGE_ID)
         const obelisk = new Obelisk({

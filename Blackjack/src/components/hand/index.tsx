@@ -92,7 +92,6 @@ const Hand = ({ identity, playerOver, setPlayerOver, playerPoints, setPlayerPoin
     }
 
     useEffect(() => {
-        setIsMasked(true)
         refreshCards()
     }, [])
 

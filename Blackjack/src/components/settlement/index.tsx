@@ -22,22 +22,12 @@ const Settlement = ({ result, oneMoreRound, bet }: { result: string, oneMoreRoun
         return ""
     }
 
-    const refreshBalance = async () => {
-        const metadata = await loadMetadata(NETWORK, PACKAGE_ID)
-        const obelisk = new Obelisk({
-            networkType: NETWORK,
-            packageId: PACKAGE_ID,
-            metadata: metadata,
-        })
-        let res = await obelisk.getEntity(WORLD_ID, "player", account.address)
-        setBalance(res ? Number(res[0]) : 0)
-        setIsMasked(false)
-        boundary = 666666
-    }
-
     const betSettlement = async () => {
-        if (result === "DRAW")
+        if (result === "LOSE") {
+            setIsMasked(false)
+            boundary = 666666
             return
+        }
 
         const metadata = await loadMetadata(NETWORK, PACKAGE_ID)
         const obelisk = new Obelisk({
@@ -48,14 +38,18 @@ const Settlement = ({ result, oneMoreRound, bet }: { result: string, oneMoreRoun
         })
         const tx = new Transaction();
         const world = tx.object(WORLD_ID);
-        const add = tx.pure.bool(result === "WIN")
-        const tx_bet = tx.pure.u128(bet)
+        const tx_balance = await obelisk.getEntity(WORLD_ID, "player", account.address)
+        const add = tx.pure.bool(true)
+        const tx_bet = tx.pure.u128(result === "WIN" ? bet * 2 : bet)
         const player = tx.pure.address(account.address)
         const params = [world, add, tx_bet, player];
         (await obelisk.tx.blackjack_system.settlement(tx, params, undefined, true)) as TransactionResult;
         const response = await obelisk.signAndSendTxn(tx);
-        if (response.effects.status.status == 'success')
-            refreshBalance()
+        if (response.effects.status.status == 'success') {
+            setBalance(Number(tx_balance[0]) + (result === "WIN" ? bet * 2 : bet))
+            setIsMasked(false)
+            boundary = 666666
+        }
     }
 
     useEffect(() => {
