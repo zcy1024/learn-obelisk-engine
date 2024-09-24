@@ -1,8 +1,8 @@
 {
   "name": "Blackjack",
   "version": "0.0.1",
-  "description": "Simple starter template",
-  "author": "team@0xobelisk.com",
+  "description": "Good Luck!",
+  "author": "zcy_chao1024@163.com",
   "license": "MIT",
   "scripts": {
     "dev": "pnpm obelisk hello && pnpm start-template",
