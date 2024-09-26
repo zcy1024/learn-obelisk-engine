@@ -6,7 +6,7 @@ import { useState, createContext, Dispatch, SetStateAction, useEffect } from "re
 import { useCurrentAccount, useSignAndExecuteTransaction } from '@mysten/dapp-kit';
 import { checkNewUser } from '../apis';
 
-export const Balance = createContext<[number, Dispatch<SetStateAction<number>>]>(null)
+export const Balance = createContext<[number, Dispatch<SetStateAction<number>>]>([0, null])
 export const Mask = createContext<Dispatch<SetStateAction<boolean>>>(null)
 
 const IndexPage: NextPage = () => {

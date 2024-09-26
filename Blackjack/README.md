@@ -39,9 +39,6 @@ For players who are not familiar with blackjack, here is a brief explanation of 
 Pull your local project and create/change the following files to contain the system account information you need:
 
 ```bash
-# PRIVATE_KEY=......
-/.env
-
 # export const PRIVATEKEY = '......'
 # export const ACCOUNT = '......'
 /src/chain/key.ts
