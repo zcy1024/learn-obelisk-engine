@@ -1,13 +1,13 @@
 import Head from 'next/head'
-const Heads = () =>{
-    return(
+const Heads = () => {
+    return (
         <Head>
-            <title>Test Website</title>
-            {/*<meta*/}
-            {/*    name="description"*/}
-            {/*    content="Seamless Portal to Web3.0."*/}
-            {/*/>*/}
-            <link rel="icon" className="rounded-full" href="/favicon.ico" />
+            <title>Suikemon</title>
+            <meta
+                name="Suikemon"
+                content="Please enjoy your card drawing and pet raising journey!"
+            />
+            <link rel="icon" className="rounded-full" href="/52poke.png" />
         </Head>
     )
 }
