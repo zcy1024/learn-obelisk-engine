@@ -1,8 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
 import suikemonData from "../../data/data"
 
-type tradingType = {
+type suikemonType = {
     suikemonID: string,
+    shiny: boolean
+}
+
+type tradingType = {
+    suikemon: suikemonType,
     price: string,
     stock: string,
     seller: string,
@@ -10,9 +15,9 @@ type tradingType = {
 
 type initialStateType = {
     suikemonData: Map<string, string[]>,
-    backpack: string[],
+    backpack: suikemonType[],
     trading: tradingType[],
-    collection: string[]
+    collection: suikemonType[]
 }
 
 const initialState = {

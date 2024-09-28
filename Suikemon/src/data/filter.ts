@@ -17,7 +17,7 @@ const step4 = step3.filter(str => {
     return false
 })
 
-const step5 = step4.map(str => str.split('|')[1] + ' ' + str.split('|')[2] + ' ' + str.split('|')[3] + ' ' + str.split('|')[4])
+const step5 = step4.map(str => str.split('|')[1] + ' ' + str.split('|')[2] + ' ' + str.split('|')[3])
 
 const step6 = step5.map(str => str + " https://wiki.52poke.com/wiki/" + encodeURIComponent(str.split(' ')[1]))
 
@@ -26,11 +26,11 @@ const finalData = step6.map(str => {
     let pre = ""
     while (pre.length + idx.length < 4)
         pre += '0'
-    return str + " .sprite-icon-" + pre + idx
+    return str + " sprite-icon-" + pre + idx
 })
 
-fs.writeFileSync("./data.txt", "// index   chinese   japanese   english   detail   sprite-icon\n" + finalData.join("\n"))
+fs.writeFileSync("./data.txt", "// index   chinese   japanese   detail   sprite-icon\n" + finalData.join("\n"))
 
-fs.writeFileSync("./data.ts", "// index   chinese   japanese   english   detail   sprite-icon\nconst data = [" + finalData.map(str => '"' + str + '",').join("\n") + ']')
+fs.writeFileSync("./data.ts", "// index   chinese   japanese   detail   sprite-icon\nconst data = [" + finalData.map(str => '"' + str + '",').join("\n") + ']')
 
 // Finally, manually fine-tune according to the rendering effect
