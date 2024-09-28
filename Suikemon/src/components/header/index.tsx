@@ -48,6 +48,9 @@ const Header = () => {
                         Home
                     </button>
                     <button className="text-sm lg:text-base font-medium transition duration-700">
+                        Random Suikemon
+                    </button>
+                    <button className="text-sm lg:text-base font-medium transition duration-700">
                         Trading Place
                     </button>
                     <button className="text-sm lg:text-base font-medium transition duration-700">
@@ -101,6 +104,9 @@ const Header = () => {
                                             <div className="space-y-4 ">
                                                 <button className="text-sm lg:text-base font-medium transition duration-700">
                                                     Home
+                                                </button>
+                                                <button className="text-sm lg:text-base font-medium transition duration-700">
+                                                    Random Suikemon
                                                 </button>
                                                 <button className="text-sm lg:text-base font-medium transition duration-700">
                                                     Trading Place

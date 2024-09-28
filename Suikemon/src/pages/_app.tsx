@@ -9,6 +9,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { getFullnodeUrl } from '@mysten/sui/client';
 import Heads from '../components/head';
 import Header from '../components/header';
+import { Provider } from 'react-redux';
+import store from '../store';
 
 // Config options for the networks you want to connect to
 const { networkConfig } = createNetworkConfig({
@@ -23,11 +25,13 @@ function MyApp({ Component, pageProps }: AppProps) {
         <QueryClientProvider client={queryClient}>
             <SuiClientProvider networks={networkConfig} defaultNetwork="testnet">
                 <WalletProvider autoConnect>
-                    <div className='h-screen bg-slate-50'>
-                        <Heads />
-                        <Header />
-                        <Component {...pageProps} />
-                    </div>
+                    <Provider store={store}>
+                        <div className='h-screen bg-slate-50'>
+                            <Heads />
+                            <Header />
+                            <Component {...pageProps} />
+                        </div>
+                    </Provider>
                 </WalletProvider>
             </SuiClientProvider>
         </QueryClientProvider>

@@ -29,8 +29,8 @@ const finalData = step6.map(str => {
     return str + " .sprite-icon-" + pre + idx
 })
 
-// console.log(finalData)
-
 fs.writeFileSync("./data.txt", "// index   chinese   japanese   english   detail   sprite-icon\n" + finalData.join("\n"))
+
+fs.writeFileSync("./data.ts", "// index   chinese   japanese   english   detail   sprite-icon\nconst data = [" + finalData.map(str => '"' + str + '",').join("\n") + ']')
 
 // Finally, manually fine-tune according to the rendering effect
