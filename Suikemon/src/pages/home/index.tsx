@@ -1,11 +1,9 @@
-import { useAppSelector } from "../../store";
+import SuikemonList from "../../components/suikemonList";
 
 const Home = () => {
-    const suikemonData = useAppSelector(state => state.suikemon.suikemonData)
     return (
         <div>
-            home
-            {suikemonData.get("1009")}
+            <SuikemonList />
         </div>
     );
 };

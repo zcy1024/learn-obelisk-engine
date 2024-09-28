@@ -1,7 +1,12 @@
+import { useState } from "react";
 import Link from "next/link";
 import { Popover } from '@headlessui/react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ConnectButton } from "@mysten/dapp-kit"
+
+function classNames(...classes) {
+    return classes.filter(Boolean).join(' ')
+}
 
 function MenuIcon(props) {
     return (
@@ -31,8 +36,21 @@ function ChevronUpIcon(props) {
 
 
 const Header = () => {
+    const [scroll, setScroll] = useState(false)
+
+    if (typeof window !== "undefined") {
+        window.onscroll = function () { myFunction() };
+    }
+
+    function myFunction() {
+        if (document.body.scrollTop > 50 || document.documentElement.scrollTop > 50) {
+            setScroll(true)
+        } else {
+            setScroll(false)
+        }
+    };
     return (
-        <div className={"py-4 flex fixed mx-auto z-40 inset-x-0 px-4 sm:px-6 lg:px-8 xl:px-24 2xl:px-56 w-full justify-between transition-all duration-700 ease-in-out items-center"}>
+        <div className={classNames(scroll ? 'p-3 backdrop-blur-sm bg-[#2E2E2E]/80' : "py-4 ", "flex fixed mx-auto z-40 inset-x-0 px-4 sm:px-6 lg:px-8 xl:px-24 2xl:px-56  w-full justify-between transition-all duration-700 ease-in-out  items-center")}>
             <div className={"relative z-10 items-center flex "}>
                 <Link href="/" legacyBehavior>
                     <a>
