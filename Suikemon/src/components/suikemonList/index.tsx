@@ -1,24 +1,48 @@
 import { useAppSelector } from "../../store";
 
+const starPosition = [["left-1/4", "top-1/4"], ["left-1/4", "bottom-1/4"], ["right-1/4", "top-1/4"], ["right-1/4", "bottom-1/4"]]
+
 export default function SuikemonList() {
     const suikemonData = useAppSelector(state => state.suikemon.suikemonData)
     let origin: string[] = []
     for (let i = 1; i <= 2000; i++)
         origin.push(i.toString())
     const data = origin.filter(key => suikemonData.has(key))
+
+    const handlerClick = (index: string) => {
+        console.log(index)
+    }
     return (
-        <div className="flex flex-wrap gap-14 pt-28 pb-4 inset-x-0 px-4 sm:px-6 lg:px-8 xl:px-24 2xl:px-56 mx-auto transition-all duration-700 ease-in-out after:flex-1">
+        <div className="flex flex-wrap gap-12 pt-28 pb-4 inset-x-0 px-4 sm:px-6 lg:px-8 xl:px-24 2xl:px-56 mx-auto transition-all duration-700 ease-in-out after:flex-1">
             {data.map(key => {
                 const [index, chinese, japanese, detail, sprite_icon] = suikemonData.get(key)
                 return (
-                    <div className="relative flex flex-col justify-between items-center h-48 w-48 text-center cursor-pointer rounded-full hover:ring transition-all duration-700 ease-in-out" key={index} onClick={() => window.open(detail, '_blank', 'noopener,noreferrer')}>
-                        <div className="absolute left-0 top-0 w-full h-full rounded-full bg-gradient-to-t from-yellow-300 opacity-30"></div>
-                        <div className="absolute left-0 top-0 w-full h-full rounded-full bg-gradient-to-b from-blue-300 opacity-60"></div>
-                        <span className={`sprite-icon ${sprite_icon} scale-[2.5]`}></span>
-                        <div className="font-medium leading-7 tracking-wider text-blue-500">
-                            <p>#{index}</p>
-                            <p>{chinese}</p>
-                            <p>{japanese}</p>
+                    <div className="relative flex justify-around items-center h-[17rem] w-[12.5rem] text-center group overflow-hidden" key={index}>
+                        <div className="relative flex flex-col justify-between items-center h-48 w-48 cursor-pointer rounded-full group-hover:ring transition-all duration-700 ease-in-out" onClick={() => window.open(detail, '_blank', 'noopener,noreferrer')}>
+                            <div className="absolute left-0 top-0 h-48 w-48 rounded-full bg-gradient-to-t from-yellow-300 opacity-30"></div>
+                            <div className="absolute left-0 top-0 h-48 w-48 rounded-full bg-gradient-to-b from-blue-300 opacity-60"></div>
+
+                            {starPosition.map(pos => (
+                                <div className={`absolute ${pos[0]} ${pos[1]} rounded-full animate-ping bg-transparent opacity-80 z-10`} key={pos.join(" ")}>
+                                    <svg className="h-2.5 w-2.5">
+                                        <polygon points="5,0.5 2,9.9 9.5,3.9 0.5,3.9 8,9.9"
+                                            style={{ fill: "yellow", stroke: "skyblue", strokeWidth: "0.4", fillRule: "evenodd" }} />
+                                        Sorry, your browser does not support inline SVG.
+                                    </svg>
+                                </div>
+                            ))}
+
+                            <span className={`sprite-icon ${sprite_icon} scale-[2.5]`}></span>
+                            <div className="font-medium leading-7 tracking-wider text-blue-500 group-hover:text-blue-200 transition-all duration-700 ease-in-out">
+                                <p>#{index}</p>
+                                <p>{chinese}</p>
+                                <p>{japanese}</p>
+                            </div>
+                        </div>
+                        <div className="absolute flex flex-col justify-evenly items-center h-[40%] w-full top-full rounded-full opacity-0 bg-transparent text-transparent group-hover:top-1/2 group-hover:opacity-60 group-hover:bg-gray-400 group-hover:text-yellow-400 transition-all duration-700 ease-in-out">
+                            <p>Number</p>
+                            <p>Price</p>
+                            <button className="rounded-full hover:scale-125 transition-transform duration-700 ease-in-out" onClick={() => handlerClick(index)}>Trading</button>
                         </div>
                     </div>
                 )

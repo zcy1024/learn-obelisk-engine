@@ -3,7 +3,8 @@ import suikemonData from "../../data/data"
 
 type suikemonType = {
     suikemonID: string,
-    shiny: boolean
+    shiny: boolean,
+    number?: string
 }
 
 type tradingType = {
