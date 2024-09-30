@@ -29,8 +29,8 @@ export default function SuikemonList() {
         })
     }
     const handlerClick = (index: string, shiny: boolean, stock: string, sprite_icon: string) => {
-        // setConfirmData({ type: "sell", index, shiny, stock, sprite_icon, clearConfirm })
-        setIsLoading(true)
+        setConfirmData({ type: "sell", index, shiny, stock, sprite_icon, clearConfirm })
+        // setIsLoading(true)
     }
 
     return (

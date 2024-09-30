@@ -1,4 +1,4 @@
-module counter::app_key {
+module Suikemon::app_key {
   /// Authorization token for the app.
     public struct AppKey has drop {}
 

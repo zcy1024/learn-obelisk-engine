@@ -1,5 +1,5 @@
 [package]
-name = "counter"
+name = "Suikemon"
 version = "0.0.1"
 edition = "2024.beta"
 
@@ -10,4 +10,4 @@ Obelisk = { git = "https://github.com/0xobelisk/obelisk-engine.git", subdir = "p
 [addresses]
 sui =  "0x2"
 obelisk =  "0xf68ab6ceb5cfce6a73d76e5ef64f28d3cbe684413c80232871b31a9df0e09496"
-counter = "0x0"
+Suikemon = "0x0"

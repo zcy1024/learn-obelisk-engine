@@ -1,5 +1,6 @@
-module counter::deploy_hook {
+module Suikemon::deploy_hook {
     use obelisk::world::{World, AdminCap};
+    use Suikemon::trading_schema;
 
     /// Not the right admin for this world
     const ENotAdmin: u64 = 0;
@@ -9,6 +10,8 @@ module counter::deploy_hook {
         
         // Logic that needs to be automated once the contract is deployed
         
+        let admin = world.admin().to_address();
+        trading_schema::set(world, admin, vector<u64>[], vector<bool>[], vector<u128>[], vector<u64>[], vector<address>[]);
     }
 
     #[test_only]

@@ -1,4 +1,4 @@
-module counter::entity_key {
+module Suikemon::entity_key {
     use sui::hash::keccak256;
     use sui::address;
     use sui::bcs;
