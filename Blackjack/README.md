@@ -43,6 +43,9 @@ Pull your local project and create/change the following files to contain the sys
 # export const ACCOUNT = '......'
 /src/chain/key.ts
 
+# PRIVATE_KEY=...
+/.env
+
 # The above information needs to correspond one to one.
 # Rest assured, both have been ignored in `.ignore`, so will not be committed to the code base.
 ```

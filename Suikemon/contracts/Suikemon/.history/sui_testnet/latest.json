@@ -1,0 +1,9 @@
+{
+  "projectName": "Suikemon",
+  "network": "testnet",
+  "packageId": "0x7d98dba8e91cb7647ac476d687ce2d903f833395e97a38b486e0594577d213da",
+  "worldId": "0x7093601c5600028d8e82531edf00962cf822d5dc11004819f7d9ad95f266a8f3",
+  "upgradeCap": "0xd185c19981cb496b59d7ed6465cb8fb6d9591c4501ddcb685b63f84b58977baa",
+  "adminCap": "0xb2b3ff6cfcdd60270a43f13aa05219c4f0ad40750182b124ab55c5f04a8a290b",
+  "version": 1
+}
