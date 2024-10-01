@@ -24,9 +24,11 @@ module Suikemon::suikemon_system {
     const ENotEnoughStock: u64 = 6;
 
     // random suikemon event
-    public struct RandomSuikemonEvent has copy, drop {
+    public struct GetSuikemonEvent has copy, drop {
         suikemon_id: u64,
-        shiny: bool
+        shiny: bool,
+        number: u64,
+        trainer: address
     }
 
     public entry fun register(world: &mut World, ctx: &mut TxContext) {
@@ -69,6 +71,13 @@ module Suikemon::suikemon_system {
         backpack_schema::set(world, player, suikemon_id, shiny, number);
 
         check_collection(world, new_index, new_shiny, player);
+
+        event::emit(GetSuikemonEvent {
+            suikemon_id: new_index,
+            shiny: new_shiny,
+            number: new_number,
+            trainer: player
+        });
     }
 
     #[allow(lint(public_random))]
@@ -78,11 +87,6 @@ module Suikemon::suikemon_system {
 
         let ran_index = index_list[ran_num(random, index_list.length() - 1, ctx)];
         let ran_shiny = ran_num(random, 1, ctx) == 1;
-
-        event::emit(RandomSuikemonEvent {
-            suikemon_id: ran_index,
-            shiny: ran_shiny
-        });
 
         add_backpack(world, ran_index, ran_shiny, 1, ctx.sender());
     }
@@ -105,8 +109,32 @@ module Suikemon::suikemon_system {
         };
     }
 
+    fun check_existed(world: &mut World, suikemon: u64, is_shiny: bool, sell_number: u64, sell_price: u128, ctx: &TxContext): bool {
+        let admin = world.admin().to_address();
+        let (suikemon_id, shiny, price, mut stock, seller) = trading_schema::get(world, admin);
+        let mut found = false;
+        let mut index = 0 as u64;
+        let max_index = suikemon_id.length();
+        while (!found && index < max_index) {
+            found = suikemon_id[index] == suikemon && shiny[index] == is_shiny && price[index] == sell_price && seller[index] == ctx.sender();
+            if (!found) {
+                index = index + 1;
+            };
+        };
+        if (!found) {
+            return false
+        };
+        let cur_number = stock.remove(index) + sell_number;
+        stock.insert(cur_number, index);
+        trading_schema::set_stock(world, admin, stock);
+        return true
+    }
+
     fun add_to_trading_place(world: &mut World, suikemon: u64, is_shiny: bool, sell_number: u64, sell_price: u128, ctx: &TxContext) {
         assert!(sell_price >= 100, ETooLowPirce);
+        if (check_existed(world, suikemon, is_shiny, sell_number, sell_price, ctx)) {
+            return
+        };
         let admin = world.admin().to_address();
         let (mut suikemon_id, mut shiny, mut price, mut stock, mut seller) = trading_schema::get(world, admin);
         suikemon_id.push_back(suikemon);
