@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useAppSelector } from "../../store";
 import Confirm, { Props as ConfirmData } from "../confirm";
 import Loading from "../loading";
+import { IsLoading } from "../../pages/_app";
 
 const starPosition = [["left-1/4", "top-1/4"], ["left-1/4", "bottom-1/4"], ["right-1/4", "top-1/4"], ["right-1/4", "bottom-1/4"]]
 
@@ -20,7 +21,7 @@ export default function SuikemonList() {
         sprite_icon: "",
         clearConfirm: () => {}
     })
-    const [isLoading, setIsLoading] = useState<boolean>(false)
+    const [isLoading, setIsLoading] = useContext(IsLoading)
 
     const clearConfirm = () => {
         setConfirmData({

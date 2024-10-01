@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import Link from "next/link";
 import { Popover } from '@headlessui/react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ConnectButton } from "@mysten/dapp-kit"
+import { ConnectButton, useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit"
+import { randomSuikemon } from "../../apis"
+import { IsLoading } from "../../pages/_app";
+import { useAppSelector } from "../../store";
 
 function classNames(...classes) {
     return classes.filter(Boolean).join(' ')
@@ -49,6 +52,44 @@ const Header = () => {
             setScroll(false)
         }
     };
+
+    const [isLoading, setIsLoading] = useContext(IsLoading)
+    const suikemonData = useAppSelector(state => state.suikemon.suikemonData)
+    const client = useSuiClient()
+    const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction({
+        execute: async ({ bytes, signature }) =>
+            await client.executeTransactionBlock({
+                transactionBlock: bytes,
+                signature,
+                options: {
+					showRawEffects: true,
+                    showEvents: true
+                },
+            }),
+    })
+
+    const account = useCurrentAccount()
+
+    const handlerClickHome = async () => {
+        console.log("home")
+    }
+
+    const handlerClickRandomSuikemon = async () => {
+        // console.log(Array.from<string>(suikemonData.keys()))
+        setIsLoading(true)
+        const suikemon_list = Array.from<string>(suikemonData.keys())
+        await randomSuikemon({ suikemon_list, signAndExecuteTransaction })
+        setIsLoading(false)
+    }
+
+    const handlerClickTradingPlace = async () => {
+        console.log("trading")
+    }
+
+    const handlerClickCollectionMap = async () => {
+        console.log("collection")
+    }
+
     return (
         <div className={classNames(scroll ? 'p-3 backdrop-blur-sm bg-[#2E2E2E]/80' : "py-4 ", "flex fixed mx-auto z-40 inset-x-0 px-4 sm:px-6 lg:px-8 xl:px-24 2xl:px-56  w-full justify-between transition-all duration-700 ease-in-out  items-center")}>
             <div className={"relative z-10 items-center flex "}>
@@ -62,16 +103,16 @@ const Header = () => {
                     </a>
                 </Link>
                 <div className="hidden lg:flex lg:gap-10 text-yellow-600">
-                    <button className="text-sm lg:text-base font-medium transition duration-700">
+                    <button className="text-sm lg:text-base font-medium transition duration-700" disabled={!account} onClick={handlerClickHome}>
                         Home
                     </button>
-                    <button className="text-sm lg:text-base font-medium transition duration-700">
+                    <button className="text-sm lg:text-base font-medium transition duration-700" disabled={!account} onClick={handlerClickRandomSuikemon}>
                         Random Suikemon
                     </button>
-                    <button className="text-sm lg:text-base font-medium transition duration-700">
+                    <button className="text-sm lg:text-base font-medium transition duration-700" disabled={!account} onClick={handlerClickTradingPlace}>
                         Trading Place
                     </button>
-                    <button className="text-sm lg:text-base font-medium transition duration-700">
+                    <button className="text-sm lg:text-base font-medium transition duration-700" disabled={!account} onClick={handlerClickCollectionMap}>
                         Collection Map
                     </button>
                 </div>
@@ -120,16 +161,16 @@ const Header = () => {
                                         >
 
                                             <div className="space-y-4 ">
-                                                <button className="text-sm lg:text-base font-medium transition duration-700">
+                                                <button className="text-sm lg:text-base font-medium transition duration-700" disabled={!account} onClick={handlerClickHome}>
                                                     Home
                                                 </button>
-                                                <button className="text-sm lg:text-base font-medium transition duration-700">
+                                                <button className="text-sm lg:text-base font-medium transition duration-700" disabled={!account} onClick={handlerClickRandomSuikemon}>
                                                     Random Suikemon
                                                 </button>
-                                                <button className="text-sm lg:text-base font-medium transition duration-700">
+                                                <button className="text-sm lg:text-base font-medium transition duration-700" disabled={!account} onClick={handlerClickTradingPlace}>
                                                     Trading Place
                                                 </button>
-                                                <button className="text-sm lg:text-base font-medium transition duration-700">
+                                                <button className="text-sm lg:text-base font-medium transition duration-700" disabled={!account} onClick={handlerClickCollectionMap}>
                                                     Collection Map
                                                 </button>
                                             </div>

@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction } from "react";
 import { NETWORK, PACKAGE_ID, WORLD_ID } from '../chain/config';
 import { PRIVATEKEY, ACCOUNT } from "../chain/key";
-import { loadMetadata, Obelisk, Transaction, TransactionResult } from '@0xobelisk/sui-client';
+import { loadMetadata, Obelisk, Transaction, TransactionResult, SuiTransactionBlockResponse } from '@0xobelisk/sui-client';
 import type { WalletAccount, SuiSignAndExecuteTransactionOutput, SuiSignAndExecuteTransactionInput } from '@mysten/wallet-standard';
 import { UseMutateAsyncFunction } from "@tanstack/react-query";
 import { PartialBy } from "@mysten/dapp-kit/dist/cjs/types/utilityTypes";
@@ -18,7 +18,8 @@ export type {
     TransactionResult,
     UseMutateAsyncFunction,
     UseSignAndExecuteTransactionError,
-    UseSignAndExecuteTransactionArgs
+    UseSignAndExecuteTransactionArgs,
+    SuiTransactionBlockResponse
 }
 
 export {
