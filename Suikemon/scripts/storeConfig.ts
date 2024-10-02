@@ -10,6 +10,7 @@ type DeploymentJsonType = {
   packageId: string;
   worldId: string;
   upgradeCap: string;
+  adminCap: string;
   version: number;
 };
 
@@ -23,18 +24,20 @@ async function getDeploymentJson(projectPath: string, network: string) {
   }
 }
 
-function storeConfig(network: string, packageId: string, worldId: string) {
+function storeConfig(network: string, packageId: string, worldId: string, adminCap: string) {
   let code = `type NetworkType = 'testnet' | 'mainnet' | 'devnet' | 'localnet';
 
 const NETWORK: NetworkType = '${network}';
 
 const PACKAGE_ID = '${packageId}'
 const WORLD_ID = '${worldId}'
+const ADMIN_CAP = '${adminCap}'
 
 export {
     NETWORK,
     PACKAGE_ID,
     WORLD_ID,
+    ADMIN_CAP
 }
 `;
   const path = process.cwd();
@@ -55,7 +58,7 @@ async function main() {
   const network = process.argv[2];
   const contractPath = `${path}/contracts/${obeliskConfig.name}`;
   const deployment = await getDeploymentJson(contractPath, network);
-  storeConfig(deployment.network, deployment.packageId, deployment.worldId);
+  storeConfig(deployment.network, deployment.packageId, deployment.worldId, deployment.adminCap);
 }
 
 main();

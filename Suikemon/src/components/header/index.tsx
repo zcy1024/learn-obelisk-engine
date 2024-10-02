@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ConnectButton, useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit"
 import { randomSuikemon } from "../../apis"
 import { IsLoading } from "../../pages/_app";
-import { useAppSelector } from "../../store";
+import suikemonData from "../../data/data"
 
 function classNames(...classes) {
     return classes.filter(Boolean).join(' ')
@@ -54,7 +54,6 @@ const Header = () => {
     };
 
     const [isLoading, setIsLoading] = useContext(IsLoading)
-    const suikemonData = useAppSelector(state => state.suikemon.suikemonData)
     const client = useSuiClient()
     const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction({
         execute: async ({ bytes, signature }) =>

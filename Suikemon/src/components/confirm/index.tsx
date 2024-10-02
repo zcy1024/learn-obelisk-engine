@@ -1,4 +1,4 @@
-import { useState, ChangeEvent, useRef, useEffect, MutableRefObject, RefObject } from "react"
+import { useState, ChangeEvent, useRef, useEffect } from "react"
 
 export type Props = {
     type: string,
@@ -53,7 +53,7 @@ export default function Confirm({ type, index, shiny, stock, sprite_icon, clearC
         <div className={"fixed top-0 " + (type === "hidden" ? "left-full " : "left-0 ") + "h-screen w-screen text-center z-[60] transition-all duration-700 ease-in-out"}>
             <div className="h-full w-full bg-black opacity-20" onClick={disappear}></div>
             <div className="absolute flex flex-col justify-between items-center h-[43%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                <span className={`sprite-icon ${sprite_icon} scale-[6.6]`}></span>
+                <span className={(shiny ? "sprite-icon-shiny " : "sprite-icon ") + `${sprite_icon} scale-[6.6]`}></span>
                 <div className="flex flex-col justify-between items-center gap-6">
                     <div className="rounded-full bg-gradient-to-tr from-yellow-300 to-blue-500 opacity-60">
                         <span className="px-2 text-indigo-600">{type === "buy" ? "Purchase quantity:" : "Sales quantity:"}</span>

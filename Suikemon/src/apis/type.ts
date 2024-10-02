@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
-import { NETWORK, PACKAGE_ID, WORLD_ID } from '../chain/config';
+import { NETWORK, PACKAGE_ID, WORLD_ID, ADMIN_CAP } from '../chain/config';
 import { PRIVATEKEY, ACCOUNT } from "../chain/key";
 import { loadMetadata, Obelisk, Transaction, TransactionResult, SuiTransactionBlockResponse } from '@0xobelisk/sui-client';
 import type { WalletAccount, SuiSignAndExecuteTransactionOutput, SuiSignAndExecuteTransactionInput } from '@mysten/wallet-standard';
@@ -26,6 +26,7 @@ export {
     NETWORK,
     PACKAGE_ID,
     WORLD_ID,
+    ADMIN_CAP,
     PRIVATEKEY,
     ACCOUNT,
     loadMetadata,
