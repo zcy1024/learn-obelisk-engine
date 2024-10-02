@@ -6,6 +6,8 @@ import type { WalletAccount, SuiSignAndExecuteTransactionOutput, SuiSignAndExecu
 import { UseMutateAsyncFunction } from "@tanstack/react-query";
 import { PartialBy } from "@mysten/dapp-kit/dist/cjs/types/utilityTypes";
 import { WalletFeatureNotSupportedError, WalletNoAccountSelectedError, WalletNotConnectedError } from "@mysten/dapp-kit/dist/cjs/errors/walletErrors";
+import { ThunkDispatch, UnknownAction, Dispatch as reduxDispatch } from "@reduxjs/toolkit";
+import { initialStateType } from "../store/modules/suikemon"
 
 type UseSignAndExecuteTransactionError = WalletFeatureNotSupportedError | WalletNoAccountSelectedError | WalletNotConnectedError | Error;
 type UseSignAndExecuteTransactionArgs = PartialBy<Omit<SuiSignAndExecuteTransactionInput, 'transaction'>, 'account' | 'chain'> & {
@@ -19,7 +21,11 @@ export type {
     UseMutateAsyncFunction,
     UseSignAndExecuteTransactionError,
     UseSignAndExecuteTransactionArgs,
-    SuiTransactionBlockResponse
+    SuiTransactionBlockResponse,
+    ThunkDispatch,
+    UnknownAction,
+    reduxDispatch,
+    initialStateType
 }
 
 export {
@@ -33,5 +39,5 @@ export {
     Obelisk,
     Transaction,
     WalletAccount,
-    SuiSignAndExecuteTransactionOutput
+    SuiSignAndExecuteTransactionOutput,
 }

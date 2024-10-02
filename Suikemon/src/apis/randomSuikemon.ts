@@ -9,12 +9,20 @@ import {
     loadMetadata,
     Obelisk,
     Transaction,
-    SuiTransactionBlockResponse
+    SuiTransactionBlockResponse,
+    ThunkDispatch,
+    initialStateType,
+    UnknownAction,
+    reduxDispatch as Dispatch
 } from "./type"
+import { setCongratulation } from "../store/modules/suikemon"
 
 type Props = {
     suikemon_list: string[],
     signAndExecuteTransaction: UseMutateAsyncFunction<SuiTransactionBlockResponse, UseSignAndExecuteTransactionError, UseSignAndExecuteTransactionArgs, unknown>,
+    dispatch: ThunkDispatch<{
+        suikemon: initialStateType;
+    }, undefined, UnknownAction> & Dispatch<UnknownAction>
 }
 
 type SuikemonInfo = {
@@ -24,7 +32,7 @@ type SuikemonInfo = {
     trainer: string
 }
 
-export default async function randomSuikemon({ suikemon_list, signAndExecuteTransaction }: Props) {
+export default async function randomSuikemon({ suikemon_list, signAndExecuteTransaction, dispatch }: Props) {
     const metadata = await loadMetadata(NETWORK, PACKAGE_ID)
     const obelisk = new Obelisk({
         networkType: NETWORK,
@@ -50,7 +58,11 @@ export default async function randomSuikemon({ suikemon_list, signAndExecuteTran
                 const suikemonInfo = suikemonEvent.parsedJson as SuikemonInfo
                 const suikemon = suikemonInfo.suikemon_id
                 const shiny = suikemonInfo.shiny
-                console.log(suikemon, shiny)
+                // console.log(suikemon, shiny)
+                dispatch(setCongratulation({
+                    suikemonID: suikemon,
+                    shiny,
+                }))
             }
         }
     )

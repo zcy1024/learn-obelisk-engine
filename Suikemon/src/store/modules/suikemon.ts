@@ -16,16 +16,21 @@ type tradingType = {
     seller: string,
 }
 
-type initialStateType = {
+export type initialStateType = {
     backpack: suikemonType[],
     trading: tradingType[],
-    collection: suikemonType[]
+    collection: suikemonType[],
+    congratulationInfo: suikemonType
 }
 
 const initialState = {
     backpack: [],
     trading: [],
-    collection: []
+    collection: [],
+    congratulationInfo: {
+        suikemonID: "",
+        shiny: true
+    }
 } as initialStateType
 
 const suikemonStore = createSlice({
@@ -40,11 +45,14 @@ const suikemonStore = createSlice({
         },
         setCollection(state, action: { payload: suikemonType[] }) {
             state.collection = action.payload
+        },
+        setCongratulation(state, action: { payload: suikemonType }) {
+            state.congratulationInfo = action.payload
         }
     }
 })
 
-const { setBackpack, setTrading, setCollection } = suikemonStore.actions
+const { setBackpack, setTrading, setCollection, setCongratulation } = suikemonStore.actions
 
 const fetchBackpack = (account: WalletAccount) => {
     return async (dispatch: ThunkDispatch<{
@@ -113,7 +121,7 @@ const refreshAll = (account: WalletAccount) => {
     }
 }
 
-export { setBackpack, setTrading, setCollection }
+export { setBackpack, setTrading, setCollection, setCongratulation }
 
 export { fetchBackpack, fetchTrading, fetchCollection, refreshAll }
 

@@ -6,6 +6,9 @@ import { ConnectButton, useCurrentAccount, useSignAndExecuteTransaction, useSuiC
 import { randomSuikemon } from "../../apis"
 import { IsLoading } from "../../pages/_app";
 import suikemonData from "../../data/data"
+import { AppDispatch } from "../../store";
+import { useDispatch } from "react-redux";
+import { refreshAll } from "../../store/modules/suikemon";
 
 function classNames(...classes) {
     return classes.filter(Boolean).join(' ')
@@ -68,6 +71,7 @@ const Header = () => {
     })
 
     const account = useCurrentAccount()
+    const dispatch = useDispatch<AppDispatch>()
 
     const handlerClickHome = async () => {
         console.log("home")
@@ -77,7 +81,8 @@ const Header = () => {
         // console.log(Array.from<string>(suikemonData.keys()))
         setIsLoading(true)
         const suikemon_list = Array.from<string>(suikemonData.keys())
-        await randomSuikemon({ suikemon_list, signAndExecuteTransaction })
+        await randomSuikemon({ suikemon_list, signAndExecuteTransaction, dispatch })
+        dispatch(refreshAll(account))
         setIsLoading(false)
     }
 

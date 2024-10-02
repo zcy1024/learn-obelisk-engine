@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import { refreshAll } from "../../store/modules/suikemon";
 import { useCurrentAccount } from "@mysten/dapp-kit";
 import suikemonData from "../../data/data"
+import Congratulation from "../congratulation";
 
 const starPosition = [["left-1/4", "top-1/4"], ["left-1/4", "bottom-1/4"], ["right-1/4", "top-1/4"], ["right-1/4", "bottom-1/4"]]
 
@@ -39,6 +40,13 @@ export default function SuikemonList() {
         setConfirmData({ type: "sell", index, shiny, stock, sprite_icon, clearConfirm })
         // setIsLoading(true)
     }
+
+    const [showCongratulation, setShowCongratulation] = useState<boolean>(false)
+    const congratulationInfo = useAppSelector(state => state.suikemon.congratulationInfo)
+    useEffect(() => {
+        const new_suikemon_id = congratulationInfo.suikemonID
+        setShowCongratulation(new_suikemon_id !== "")
+    }, [congratulationInfo])
 
     return (
         <>
@@ -78,6 +86,7 @@ export default function SuikemonList() {
                 })}
             </div>
             <Confirm type={confirmData.type} index={confirmData.index} shiny={confirmData.shiny} stock={confirmData.stock} sprite_icon={confirmData.sprite_icon} clearConfirm={confirmData.clearConfirm} />
+            <Congratulation show={showCongratulation} index={congratulationInfo.suikemonID} shiny={congratulationInfo.shiny} />
             { isLoading && <Loading /> }
         </>
     )
