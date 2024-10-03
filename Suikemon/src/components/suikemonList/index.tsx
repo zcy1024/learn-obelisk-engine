@@ -20,15 +20,17 @@ export default function SuikemonList() {
 
     const backpack = useAppSelector(state => state.suikemon.backpack)
 
+    const [isLoading, setIsLoading] = useContext(IsLoading)
+
     const [confirmData, setConfirmData] = useState<ConfirmData>({
         type: "hidden",
         index: "",
         shiny: false,
         stock: "",
         sprite_icon: "",
-        clearConfirm: () => {}
+        clearConfirm: () => {},
+        setIsLoading: null
     })
-    const [isLoading, setIsLoading] = useContext(IsLoading)
 
     const clearConfirm = () => {
         setConfirmData({
@@ -37,8 +39,7 @@ export default function SuikemonList() {
         })
     }
     const handlerClick = (index: string, shiny: boolean, stock: string, sprite_icon: string) => {
-        setConfirmData({ type: "sell", index, shiny, stock, sprite_icon, clearConfirm })
-        // setIsLoading(true)
+        setConfirmData({ type: "sell", index, shiny, stock, sprite_icon, clearConfirm, setIsLoading })
     }
 
     const [showCongratulation, setShowCongratulation] = useState<boolean>(false)
@@ -85,7 +86,7 @@ export default function SuikemonList() {
                     )
                 })}
             </div>
-            <Confirm type={confirmData.type} index={confirmData.index} shiny={confirmData.shiny} stock={confirmData.stock} sprite_icon={confirmData.sprite_icon} clearConfirm={confirmData.clearConfirm} />
+            <Confirm type={confirmData.type} index={confirmData.index} shiny={confirmData.shiny} stock={confirmData.stock} sprite_icon={confirmData.sprite_icon} clearConfirm={confirmData.clearConfirm} setIsLoading={confirmData.setIsLoading} />
             <Congratulation show={showCongratulation} index={congratulationInfo.suikemonID} shiny={congratulationInfo.shiny} />
             { isLoading && <Loading /> }
         </>
