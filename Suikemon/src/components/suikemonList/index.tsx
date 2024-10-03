@@ -6,6 +6,7 @@ import { IsLoading } from "../../pages/_app";
 import { suikemonType, tradingType } from "../../store/modules/suikemon";
 import suikemonData from "../../data/data"
 import Congratulation from "../congratulation";
+import { useCurrentAccount } from "@mysten/dapp-kit";
 
 const starPosition = [["left-1/4", "top-1/4"], ["left-1/4", "bottom-1/4"], ["right-1/4", "top-1/4"], ["right-1/4", "bottom-1/4"]]
 
@@ -34,7 +35,8 @@ export default function SuikemonList() {
         clearConfirm: () => { },
         setIsLoading: null,
         unit_price: 0,
-        index_in_trading_place: -1
+        index_in_trading_place: -1,
+        seller: ""
     })
 
     const clearConfirm = () => {
@@ -43,8 +45,8 @@ export default function SuikemonList() {
             type: "hidden"
         })
     }
-    const handlerClick = (index: string, shiny: boolean, stock: string, sprite_icon: string, unit_price: number, index_in_trading_place: number) => {
-        setConfirmData({ type: (showType === "Home" ? "sell" : "buy"), index, shiny, stock, sprite_icon, clearConfirm, setIsLoading, unit_price, index_in_trading_place })
+    const handlerClick = (index: string, shiny: boolean, stock: string, sprite_icon: string, unit_price: number, index_in_trading_place: number, seller: string) => {
+        setConfirmData({ type: (showType === "Home" ? "sell" : "buy"), index, shiny, stock, sprite_icon, clearConfirm, setIsLoading, unit_price, index_in_trading_place, seller })
     }
 
     const [showCongratulation, setShowCongratulation] = useState<boolean>(false)
@@ -53,6 +55,8 @@ export default function SuikemonList() {
         const new_suikemon_id = congratulationInfo.suikemonID
         setShowCongratulation(new_suikemon_id !== "")
     }, [congratulationInfo])
+
+    const account = useCurrentAccount()
 
     return (
         <>
@@ -92,15 +96,23 @@ export default function SuikemonList() {
                                 <div className="absolute flex flex-col justify-evenly items-center h-[40%] w-full top-full rounded-full opacity-0 bg-transparent text-transparent group-hover:top-1/2 group-hover:opacity-60 group-hover:bg-gray-400 group-hover:text-yellow-400 transition-all duration-700 ease-in-out">
                                     <p>Number: {isSuikemonType(suikemon) ? suikemon.number : suikemon.stock}</p>
                                     { !isSuikemonType(suikemon) &&  <p>Price: {suikemon.price}</p> }
-                                    { isSuikemonType(suikemon) && showType === "Home" && <button className="rounded-full hover:scale-125 transition-transform duration-700 ease-in-out" onClick={() => handlerClick(index, suikemon.shiny, suikemon.number, sprite_icon, 0, -1)}>Trading</button> }
-                                    { !isSuikemonType(suikemon) && <button className="rounded-full hover:scale-125 transition-transform duration-700 ease-in-out" onClick={() => handlerClick(index, suikemon.suikemon.shiny, suikemon.stock, sprite_icon, Number(suikemon.price), index_in_trading_place)}>BUY</button> }
+                                    { isSuikemonType(suikemon) && showType === "Home" && <button className="rounded-full hover:scale-125 transition-transform duration-700 ease-in-out" onClick={() => handlerClick(index, suikemon.shiny, suikemon.number, sprite_icon, 0, -1, "")}>Trading</button> }
+                                    { !isSuikemonType(suikemon) &&
+                                        <button className="rounded-full hover:scale-125 transition-transform duration-700 ease-in-out" onClick={() => handlerClick(index, suikemon.suikemon.shiny, suikemon.stock, sprite_icon, Number(suikemon.price), index_in_trading_place, suikemon.seller)}>
+                                        {
+                                            account && account.address.slice(2) !== suikemon.seller &&
+                                            <span>BUY</span> ||
+                                            <span>REDEEM</span>
+                                        }
+                                        </button>
+                                    }
                                 </div>
                             }
                         </div>
                     )
                 })}
             </div>
-            <Confirm type={confirmData.type} index={confirmData.index} shiny={confirmData.shiny} stock={confirmData.stock} sprite_icon={confirmData.sprite_icon} clearConfirm={confirmData.clearConfirm} setIsLoading={confirmData.setIsLoading} unit_price={confirmData.unit_price} index_in_trading_place={confirmData.index_in_trading_place} />
+            <Confirm type={confirmData.type} index={confirmData.index} shiny={confirmData.shiny} stock={confirmData.stock} sprite_icon={confirmData.sprite_icon} clearConfirm={confirmData.clearConfirm} setIsLoading={confirmData.setIsLoading} unit_price={confirmData.unit_price} index_in_trading_place={confirmData.index_in_trading_place} seller={confirmData.seller} />
             <Congratulation show={showCongratulation} index={congratulationInfo.suikemonID} shiny={congratulationInfo.shiny} />
             {isLoading && <Loading />}
         </>

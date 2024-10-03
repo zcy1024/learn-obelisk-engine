@@ -1,5 +1,5 @@
 import { useState, ChangeEvent, useRef, useEffect, Dispatch, SetStateAction, useDebugValue } from "react"
-import { buy, sell } from "../../apis"
+import { buy, cancel, sell } from "../../apis"
 import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit"
 import { useDispatch } from "react-redux"
 import { AppDispatch, useAppSelector } from "../../store"
@@ -14,10 +14,11 @@ export type Props = {
     clearConfirm: () => void,
     setIsLoading: Dispatch<SetStateAction<boolean>>,
     unit_price: number,
-    index_in_trading_place: number
+    index_in_trading_place: number,
+    seller: string
 }
 
-export default function Confirm({ type, index, shiny, stock, sprite_icon, clearConfirm, setIsLoading, unit_price, index_in_trading_place }: Props) {
+export default function Confirm({ type, index, shiny, stock, sprite_icon, clearConfirm, setIsLoading, unit_price, index_in_trading_place, seller }: Props) {
     const [price, setPrice] = useState<string>("")
     const [number, setNumber] = useState<string>("")
     const [tip, setTip] = useState<boolean>(false)
@@ -97,8 +98,10 @@ export default function Confirm({ type, index, shiny, stock, sprite_icon, clearC
         setIsLoading(true)
         if (type === "sell")
             await sell({ suikemon: index, is_shiny: shiny, sell_number: number, sell_price: price, signAndExecuteTransaction })
-        else
+        else if (account && account.address.slice(2) !== seller)
             await buy({ buy_index: index_in_trading_place, buy_number: number, coin_value: Number(number) * unit_price, signAndExecuteTransaction: signAndExecuteTransactionWithEvents, dispatch })
+        else
+            await cancel({ cancel_index: index_in_trading_place, cancel_number: number, coin_value: Number(number) * Math.min(666666, unit_price), signAndExecuteTransaction: signAndExecuteTransactionWithEvents, dispatch })
         dispatch(refreshAll(account))
         disappear()
         setIsLoading(false)
@@ -113,22 +116,38 @@ export default function Confirm({ type, index, shiny, stock, sprite_icon, clearC
                     {
                         type === "sell"
                         &&
-                        <div className="flex justify-between w-60 rounded-full bg-gradient-to-tr from-yellow-300 to-blue-500 opacity-60">
+                        <div className="flex justify-between w-64 rounded-full bg-gradient-to-tr from-yellow-300 to-blue-500 opacity-60">
                             <span className="ml-2 text-indigo-600">Sales price:</span>
-                            <input className="pr-2 ml-2 w-32 outline-0 bg-transparent" value={price} onChange={handlerPriceChange} ref={priceRef} />
+                            <input className="pr-2 ml-2 w-[9.5rem] outline-0 bg-transparent" value={price} onChange={handlerPriceChange} ref={priceRef} />
                         </div>
                     }
-                    <div className="flex justify-between w-60 rounded-full bg-gradient-to-tr from-yellow-300 to-blue-500 opacity-60">
-                        <span className="ml-2 text-indigo-600">{type === "buy" ? "Purchase quantity:" : "Sales quantity:"}</span>
-                        <input className="pr-2 ml-2 w-20 outline-0 bg-transparent" value={number} onChange={handlerNumberChange} ref={numberRef} />
+                    <div className="flex justify-between w-64 rounded-full bg-gradient-to-tr from-yellow-300 to-blue-500 opacity-60">
+                        <span className="ml-2 text-indigo-600">{type === "buy" ? (account && account.address.slice(2) === seller ? "Redemption quantity:" : "Purchase quantity:") : "Sales quantity:"}</span>
+                        <input className={"pr-2 ml-2 " + (type === "buy" ? (account && account.address.slice(2) === seller ? "w-20 " : "w-[6.5rem] ") : "w-32 ") + "outline-0 bg-transparent"} value={number} onChange={handlerNumberChange} ref={numberRef} />
                     </div>
                     {
                         type === "buy"
                         &&
-                        <span className="ml-2 text-indigo-600 opacity-60">Estimated cost: {Number(number) * unit_price}</span>
+                        (
+                            account
+                            &&
+                            account.address.slice(2) === seller
+                            &&
+                            <span className="ml-2 text-indigo-600 opacity-60">Expected fees for redeeming your Suikemon: {Number(number) * Math.min(666666, unit_price)}</span>
+                            ||
+                            <span className="ml-2 text-indigo-600 opacity-60">Estimated cost: {Number(number) * unit_price}</span>
+                        )
                     }
                     <button className="py-1 px-2 rounded-full font-medium tracking-wider bg-yellow-100 text-blue-500 hover:bg-blue-200 hover:text-yellow-500 active:scale-90 transition-colors duration-700 ease-in-out" onClick={handlerOnClick}>Confirm</button>
-                    <span className={(tip ? "opacity-100 " : "opacity-0 ") + "text-red-600 transition-opacity duration-700 ease-in-out"}>The price cannot be less than 100 or more than 9999999999999,<br />and the quantity cannot exceed {stock}!</span>
+                    <span className={(tip ? "opacity-100 " : "opacity-0 ") + "text-red-600 transition-opacity duration-700 ease-in-out"}>
+                        {
+                            type === "sell"
+                            &&
+                            <span>The price cannot be less than 100 or more than 9999999999999,<br />and the quantity cannot exceed {stock}!</span>
+                            ||
+                            <span>The quantity cannot exceed {stock}!</span>
+                        }
+                    </span>
                 </div>
             </div>
         </div>
