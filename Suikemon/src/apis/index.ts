@@ -3,6 +3,7 @@ import checkNewUser from "./checkNewUser"
 import register from "./register"
 import { getBackpack, getTrading, getCollection } from "./getData"
 import sell from "./sell"
+import buy from "./buy"
 
 export {
     randomSuikemon,
@@ -11,5 +12,6 @@ export {
     getBackpack,
     getTrading,
     getCollection,
-    sell
+    sell,
+    buy
 }

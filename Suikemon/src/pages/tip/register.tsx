@@ -4,15 +4,19 @@ import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-ki
 import { checkNewUser, register } from "../../apis";
 import { IsLoading } from "../_app";
 import Loading from "../../components/loading";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../store";
+import { refreshAll } from "../../store/modules/suikemon";
 
 const Register = () => {
     const router = useRouter()
     const account = useCurrentAccount()
+    const dispatch = useDispatch<AppDispatch>()
     useEffect(() => {
         if (router.isReady && !account)
             router.push("/")
         if (router.isReady && account)
-            checkNewUser({ account, router })
+            checkNewUser({ account, router, dispatch })
     }, [router, account])
 
     const [isLoading, setIsLoading] = useContext(IsLoading)
@@ -20,6 +24,7 @@ const Register = () => {
     const handlerClick = async () => {
         setIsLoading(true)
         await register({ signAndExecuteTransaction, router })
+        dispatch(refreshAll(account))
         setIsLoading(false)
         router.push("/")
     }

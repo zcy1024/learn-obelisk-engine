@@ -3,13 +3,13 @@ import type { WalletAccount } from '@mysten/wallet-standard';
 import { getBackpack, getTrading, getCollection } from "../../apis";
 import { ThunkDispatch, UnknownAction, Dispatch } from "@reduxjs/toolkit";
 
-type suikemonType = {
+export type suikemonType = {
     suikemonID: string,
     shiny: boolean,
     number?: string
 }
 
-type tradingType = {
+export type tradingType = {
     suikemon: suikemonType,
     price: string,
     stock: string,
@@ -20,7 +20,8 @@ export type initialStateType = {
     backpack: suikemonType[],
     trading: tradingType[],
     collection: suikemonType[],
-    congratulationInfo: suikemonType
+    congratulationInfo: suikemonType,
+    pageShowType: string
 }
 
 const initialState = {
@@ -30,7 +31,8 @@ const initialState = {
     congratulationInfo: {
         suikemonID: "",
         shiny: true
-    }
+    },
+    pageShowType: "Home"
 } as initialStateType
 
 const suikemonStore = createSlice({
@@ -48,11 +50,14 @@ const suikemonStore = createSlice({
         },
         setCongratulation(state, action: { payload: suikemonType }) {
             state.congratulationInfo = action.payload
+        },
+        setPageShowType(state, action: { payload: string }) {
+            state.pageShowType = action.payload
         }
     }
 })
 
-const { setBackpack, setTrading, setCollection, setCongratulation } = suikemonStore.actions
+const { setBackpack, setTrading, setCollection, setCongratulation, setPageShowType } = suikemonStore.actions
 
 const fetchBackpack = (account: WalletAccount) => {
     return async (dispatch: ThunkDispatch<{
@@ -121,7 +126,7 @@ const refreshAll = (account: WalletAccount) => {
     }
 }
 
-export { setBackpack, setTrading, setCollection, setCongratulation }
+export { setBackpack, setTrading, setCollection, setCongratulation, setPageShowType }
 
 export { fetchBackpack, fetchTrading, fetchCollection, refreshAll }
 

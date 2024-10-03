@@ -1,8 +1,8 @@
 import { useState, ChangeEvent, useRef, useEffect, Dispatch, SetStateAction, useDebugValue } from "react"
-import { sell } from "../../apis"
-import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit"
+import { buy, sell } from "../../apis"
+import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit"
 import { useDispatch } from "react-redux"
-import { AppDispatch } from "../../store"
+import { AppDispatch, useAppSelector } from "../../store"
 import { refreshAll } from "../../store/modules/suikemon"
 
 export type Props = {
@@ -12,10 +12,12 @@ export type Props = {
     stock: string,
     sprite_icon: string,
     clearConfirm: () => void,
-    setIsLoading: Dispatch<SetStateAction<boolean>>
+    setIsLoading: Dispatch<SetStateAction<boolean>>,
+    unit_price: number,
+    index_in_trading_place: number
 }
 
-export default function Confirm({ type, index, shiny, stock, sprite_icon, clearConfirm, setIsLoading }: Props) {
+export default function Confirm({ type, index, shiny, stock, sprite_icon, clearConfirm, setIsLoading, unit_price, index_in_trading_place }: Props) {
     const [price, setPrice] = useState<string>("")
     const [number, setNumber] = useState<string>("")
     const [tip, setTip] = useState<boolean>(false)
@@ -25,7 +27,7 @@ export default function Confirm({ type, index, shiny, stock, sprite_icon, clearC
         for (let i = 0; i < cur_num.length; i++)
             if (cur_num[i] < '0' || cur_num[i] > '9')
                 return
-        if (Number(cur_num) < 0) {
+        if (Number(cur_num) < 0 || Number(cur_num) > 9999999999999) {
             setTip(true)
             return
         }
@@ -54,7 +56,7 @@ export default function Confirm({ type, index, shiny, stock, sprite_icon, clearC
     useEffect(() => {
         if (type === "hidden")
             return
-        priceRef.current.focus()
+        type === "sell" ? priceRef.current.focus() : numberRef.current.focus()
     }, [type])
 
     const disappear = () => {
@@ -67,8 +69,22 @@ export default function Confirm({ type, index, shiny, stock, sprite_icon, clearC
     const account = useCurrentAccount()
     const dispatch = useDispatch<AppDispatch>()
     const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction()
+    const client = useSuiClient()
+    const { mutateAsync: signAndExecuteTransactionWithEvents } = useSignAndExecuteTransaction({
+        execute: async ({ bytes, signature }) =>
+            await client.executeTransactionBlock({
+                transactionBlock: bytes,
+                signature,
+                options: {
+					showRawEffects: true,
+                    showEvents: true,
+                    showEffects: true
+                },
+            }),
+    })
+
     const handlerOnClick = async () => {
-        if (price === "" || Number(price) < 100) {
+        if (type === "sell" && (price === "" || Number(price) < 100)) {
             priceRef.current.focus()
             setTip(true)
             return
@@ -79,7 +95,10 @@ export default function Confirm({ type, index, shiny, stock, sprite_icon, clearC
             return
         }
         setIsLoading(true)
-        await sell({ suikemon: index, is_shiny: shiny, sell_number: number, sell_price: price, signAndExecuteTransaction })
+        if (type === "sell")
+            await sell({ suikemon: index, is_shiny: shiny, sell_number: number, sell_price: price, signAndExecuteTransaction })
+        else
+            await buy({ buy_index: index_in_trading_place, buy_number: number, coin_value: Number(number) * unit_price, signAndExecuteTransaction: signAndExecuteTransactionWithEvents, dispatch })
         dispatch(refreshAll(account))
         disappear()
         setIsLoading(false)
@@ -88,19 +107,28 @@ export default function Confirm({ type, index, shiny, stock, sprite_icon, clearC
     return (
         <div className={"fixed top-0 " + (type === "hidden" ? "left-full " : "left-0 ") + "h-screen w-screen text-center z-[60] transition-all duration-700 ease-in-out"}>
             <div className="h-full w-full bg-black opacity-20" onClick={disappear}></div>
-            <div className="absolute flex flex-col justify-between items-center h-[48%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+            <div className="absolute flex flex-col justify-between items-center h-[49%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                 <span className={(shiny ? "sprite-icon-shiny " : "sprite-icon ") + `${sprite_icon} scale-[6.6]`}></span>
                 <div className="flex flex-col justify-between items-center gap-6">
-                    <div className="flex justify-between w-52 rounded-full bg-gradient-to-tr from-yellow-300 to-blue-500 opacity-60">
-                        <span className="ml-2 text-indigo-600">Sales price:</span>
-                        <input className="pr-2 ml-2 w-20 outline-0 bg-transparent" value={price} onChange={handlerPriceChange} ref={priceRef} />
-                    </div>
-                    <div className="flex justify-between w-52 rounded-full bg-gradient-to-tr from-yellow-300 to-blue-500 opacity-60">
+                    {
+                        type === "sell"
+                        &&
+                        <div className="flex justify-between w-60 rounded-full bg-gradient-to-tr from-yellow-300 to-blue-500 opacity-60">
+                            <span className="ml-2 text-indigo-600">Sales price:</span>
+                            <input className="pr-2 ml-2 w-32 outline-0 bg-transparent" value={price} onChange={handlerPriceChange} ref={priceRef} />
+                        </div>
+                    }
+                    <div className="flex justify-between w-60 rounded-full bg-gradient-to-tr from-yellow-300 to-blue-500 opacity-60">
                         <span className="ml-2 text-indigo-600">{type === "buy" ? "Purchase quantity:" : "Sales quantity:"}</span>
                         <input className="pr-2 ml-2 w-20 outline-0 bg-transparent" value={number} onChange={handlerNumberChange} ref={numberRef} />
                     </div>
+                    {
+                        type === "buy"
+                        &&
+                        <span className="ml-2 text-indigo-600 opacity-60">Estimated cost: {Number(number) * unit_price}</span>
+                    }
                     <button className="py-1 px-2 rounded-full font-medium tracking-wider bg-yellow-100 text-blue-500 hover:bg-blue-200 hover:text-yellow-500 active:scale-90 transition-colors duration-700 ease-in-out" onClick={handlerOnClick}>Confirm</button>
-                    <span className={(tip ? "opacity-100 " : "opacity-0 ") + "text-red-600 transition-opacity duration-700 ease-in-out"}>The price cannot be less than 100 and the quantity cannot exceed {stock}!</span>
+                    <span className={(tip ? "opacity-100 " : "opacity-0 ") + "text-red-600 transition-opacity duration-700 ease-in-out"}>The price cannot be less than 100 or more than 9999999999999,<br />and the quantity cannot exceed {stock}!</span>
                 </div>
             </div>
         </div>

@@ -1,4 +1,5 @@
 import { useState, useContext } from "react";
+import { useRouter } from "next/router";
 import Link from "next/link";
 import { Popover } from '@headlessui/react'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -8,7 +9,7 @@ import { IsLoading } from "../../pages/_app";
 import suikemonData from "../../data/data"
 import { AppDispatch } from "../../store";
 import { useDispatch } from "react-redux";
-import { refreshAll } from "../../store/modules/suikemon";
+import { refreshAll, setPageShowType } from "../../store/modules/suikemon";
 
 function classNames(...classes) {
     return classes.filter(Boolean).join(' ')
@@ -73,8 +74,9 @@ const Header = () => {
     const account = useCurrentAccount()
     const dispatch = useDispatch<AppDispatch>()
 
-    const handlerClickHome = async () => {
-        console.log("home")
+    const router = useRouter()
+    const handlerClickHome = () => {
+        dispatch(setPageShowType("Home"))
     }
 
     const handlerClickRandomSuikemon = async () => {
@@ -87,11 +89,11 @@ const Header = () => {
     }
 
     const handlerClickTradingPlace = async () => {
-        console.log("trading")
+        dispatch(setPageShowType("Trading Place"))
     }
 
     const handlerClickCollectionMap = async () => {
-        console.log("collection")
+        dispatch(setPageShowType("Collection Map"))
     }
 
     return (
