@@ -17,7 +17,8 @@ export default function SuikemonList() {
             return state.suikemon.backpack
         if (showType === "Trading Place")
             return state.suikemon.trading
-        return state.suikemon.collection.toSorted((a, b) => {
+        const collection = [...state.suikemon.collection]
+        return collection.sort((a, b) => {
             if (a.suikemonID !== b.suikemonID)
                 return Number(a.suikemonID) - Number(b.suikemonID)
             return a.shiny ? 1 : -1
