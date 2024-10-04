@@ -65,7 +65,7 @@ const Header = () => {
                 transactionBlock: bytes,
                 signature,
                 options: {
-					showRawEffects: true,
+                    showRawEffects: true,
                     showEvents: true
                 },
             }),
@@ -189,6 +189,8 @@ const Header = () => {
                         </>
                     )}
                 </Popover>
+
+                <audio controls autoPlay loop src="/BGM.mp3" />
 
                 <div className="hidden lg:flex gap-4 items-center h-10">
                     <ConnectButton />
